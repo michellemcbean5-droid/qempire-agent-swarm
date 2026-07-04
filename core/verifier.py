@@ -10,7 +10,7 @@ def verifier_node(state: AgentState) -> AgentState:
     if state["current_step"] >= len(state["plan"]):
         # All steps done
         state["final_result"] = _build_final_result(state)
-        state["event_stream"].append("[VERIFIER] All steps complete. Task finished.")
+        state["event_stream"].append("[MICHELLE] All steps complete. Your empire is ready! 🧜🏾‍♀️")
         return state
 
     current_step = state["plan"][state["current_step"]]
@@ -19,13 +19,13 @@ def verifier_node(state: AgentState) -> AgentState:
         # Success — advance to next step
         state["current_step"] += 1
         state["event_stream"].append(
-            f"[VERIFIER] Step {current_step['step']} verified OK. Advancing."
+            f"[MICHELLE] Step {current_step['step']} verified OK. Advancing."
         )
 
         # Check if that was the last step
         if state["current_step"] >= len(state["plan"]):
             state["final_result"] = _build_final_result(state)
-            state["event_stream"].append("[VERIFIER] All steps complete. Task finished.")
+            state["event_stream"].append("[MICHELLE] All steps complete. Your empire is ready! 🧜🏾‍♀️")
 
     elif current_step["status"] == "failed":
         if state["error_count"] >= state["max_errors"]:
@@ -38,13 +38,13 @@ def verifier_node(state: AgentState) -> AgentState:
                 "deliverables": _extract_deliverables(state["plan"]),
             }
             state["event_stream"].append(
-                f"[VERIFIER] Max errors ({state['max_errors']}) reached. Aborting."
+                f"[MICHELLE] Max errors ({state['max_errors']}) reached. Aborting."
             )
         else:
             # Retry the step
             current_step["status"] = "pending"
             state["event_stream"].append(
-                f"[VERIFIER] Step {current_step['step']} failed. Retry {state['error_count']}/{state['max_errors']}."
+                f"[MICHELLE] Step {current_step['step']} failed. Retry {state['error_count']}/{state['max_errors']}."
             )
 
     return state

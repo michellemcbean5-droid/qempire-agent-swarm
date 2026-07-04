@@ -22,7 +22,7 @@ export default function ClientPortal() {
       {/* Sidebar */}
       <aside className="w-64 bg-[#0a0a0f] border-r border-[#4169E1]/20 p-6 hidden md:block">
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4169E1] to-[#BF00FF] flex items-center justify-center font-black text-sm">Q</div>
+          <div className="text-2xl">🧜🏾‍♀️</div>
           <span className="font-bold text-sm">Client Portal</span>
         </div>
         <nav className="space-y-2">
@@ -37,8 +37,8 @@ export default function ClientPortal() {
       {/* Main Content */}
       <main className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">Welcome back!</h1>
-          <p className="text-white/60 mb-8">Your empire is being built. Here's the progress:</p>
+          <h1 className="text-3xl font-bold mb-2">Welcome back! 🧜🏾‍♀️</h1>
+          <p className="text-white/60 mb-8">Michelle & Q-Bot are building your empire. Here's the progress:</p>
 
           {/* Progress Cards */}
           <div className="grid md:grid-cols-2 gap-6 mb-12">

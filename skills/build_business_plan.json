@@ -44,7 +44,7 @@
       "params_template": {
         "to": "{client_email}",
         "subject": "Your Business Blueprint is Ready! 📋",
-        "body": "Your business plan and pitch deck have been generated. Log into your Client Portal to download them and review the market research."
+        "body": "Michelle and Q-Bot have finished your business plan and pitch deck. Log into your Client Portal to download them and review the market research."
       },
       "description": "Notify client that blueprint is complete"
     }

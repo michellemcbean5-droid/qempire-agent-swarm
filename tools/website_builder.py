@@ -15,6 +15,8 @@ Primary Colors: {colors}
 Target Audience: {target_audience}
 Value Proposition: {elevator_pitch}
 
+Brand Theme: This website is being built by Q-Empire Automation, guided by Michelle (the Black Mermaid Queen of the Deep) and Q-Bot (the friendly automation agent). The design should feel magical, clear, and empowering — especially welcoming to founders of color. Use ocean, mermaid, and tech motifs subtly.
+
 Requirements:
 - Use Tailwind CSS via CDN (https://cdn.tailwindcss.com)
 - Dark theme background (#0A0A1A) with colorful accents

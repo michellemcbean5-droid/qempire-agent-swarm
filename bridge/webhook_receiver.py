@@ -16,7 +16,7 @@ from core.config import BRIDGE_PATH
 
 app = FastAPI(
     title="Q-Empire Agent Swarm API",
-    description="Webhook endpoint for the Q-Empire autonomous agent system",
+    description="Webhook endpoint for the Q-Empire autonomous agent system — guided by Michelle & Q-Bot",
     version="1.0.0",
 )
 
@@ -46,7 +46,7 @@ def save_bridge(data: dict) -> None:
 @app.get("/")
 async def root():
     """Health check endpoint."""
-    return {"status": "online", "service": "Q-Empire Agent Swarm", "version": "1.0.0"}
+    return {"status": "online", "service": "Q-Empire Agent Swarm", "version": "1.0.0", "guides": "Michelle & Q-Bot"}
 
 
 @app.post("/task")
@@ -66,7 +66,7 @@ async def create_task(request: Request):
     bridge["pending"].append(task)
     save_bridge(bridge)
 
-    print(f"[WEBHOOK] New task queued: {task['id']} ({task['type']})")
+    print(f"[MICHELLE] New task queued: {task['id']} ({task['type']})")
 
     return {"status": "queued", "task_id": task["id"], "position": len(bridge["pending"])}
 
@@ -139,18 +139,18 @@ async def receive_onboarding(request: Request):
 
     save_bridge(bridge)
 
-    print(f"[WEBHOOK] Onboarding received for {client_email} ({package_id}): {len(created_tasks)} tasks created")
+    print(f"[MICHELLE] Onboarding received for {client_email} ({package_id}): {len(created_tasks)} tasks created")
 
     return {
         "status": "success",
         "package": package_id,
         "tasks_created": created_tasks,
-        "message": f"Q-Bot is now building your empire! {len(created_tasks)} tasks queued.",
+        "message": f"Michelle & Q-Bot are now building your empire! {len(created_tasks)} tasks queued.",
     }
 
 
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("WEBHOOK_PORT", "8080"))
-    print(f"[WEBHOOK] Starting Q-Empire Agent API on port {port}...")
+    print(f"[MICHELLE] Starting Q-Empire Agent API on port {port}...")
     uvicorn.run(app, host="0.0.0.0", port=port)

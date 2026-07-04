@@ -29,7 +29,7 @@ export default function Checkout() {
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#4169E1] to-[#BF00FF] flex items-center justify-center font-black text-2xl mx-auto mb-4">Q</div>
           <h1 className="text-2xl font-bold mb-2">Secure Checkout</h1>
-          <p className="text-white/60 text-sm">You're about to unlock your automated empire</p>
+          <p className="text-white/60 text-sm">Michelle & Q-Bot are ready to build your empire</p>
         </div>
 
         <div className="bg-[#0A0A1A] border border-[#BF00FF]/30 rounded-xl p-6 mb-6">

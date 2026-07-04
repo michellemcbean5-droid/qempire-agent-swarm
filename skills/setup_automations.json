@@ -26,7 +26,7 @@
       "params_template": {
         "to": "{client_email}",
         "subject": "Your AI Automations Are Configured! 🤖",
-        "body": "Your automations are set up and ready to run 24/7. Check your Client Portal for the setup guide and webhook URLs."
+        "body": "Q-Bot has your automations set up and ready to run 24/7. Check your Client Portal for the setup guide and webhook URLs."
       },
       "description": "Notify client that automations are active"
     }

@@ -16,7 +16,7 @@ def executor_node(state: AgentState) -> AgentState:
     current_step["status"] = "in_progress"
 
     state["event_stream"].append(
-        f"[EXECUTOR] Starting step {current_step['step']}: {current_step['description']}"
+        f"[Q-BOT] Starting step {current_step['step']}: {current_step['description']}"
     )
 
     try:
@@ -30,7 +30,7 @@ def executor_node(state: AgentState) -> AgentState:
         current_step["status"] = "completed"
         current_step["result"] = result
         state["event_stream"].append(
-            f"[EXECUTOR] Step {current_step['step']} completed: {str(result)[:200]}"
+            f"[Q-BOT] Step {current_step['step']} completed: {str(result)[:200]}"
         )
 
     except Exception as e:
@@ -38,7 +38,7 @@ def executor_node(state: AgentState) -> AgentState:
         current_step["result"] = f"ERROR: {str(e)}"
         state["error_count"] += 1
         state["event_stream"].append(
-            f"[EXECUTOR] Step {current_step['step']} FAILED: {str(e)}"
+            f"[Q-BOT] Step {current_step['step']} FAILED: {str(e)}"
         )
         # Log full traceback for debugging
         state["event_stream"].append(f"[EXECUTOR] Traceback: {traceback.format_exc()}")
