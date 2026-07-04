@@ -1,9 +1,15 @@
 """Shell command execution tool (sandboxed inside Docker)."""
+import os
 import subprocess
+
+
+# Allow overriding the working directory for testing / non-Docker environments
+SHELL_CWD = os.getenv("QEMPIRE_SHELL_CWD", "/home/ubuntu/workspace")
 
 
 def shell_exec(command: str, timeout: int = 60) -> str:
     """Execute a shell command and return output. Only safe inside Docker."""
+    cwd = SHELL_CWD if os.path.isdir(SHELL_CWD) else os.getcwd()
     try:
         result = subprocess.run(
             command,
@@ -11,7 +17,7 @@ def shell_exec(command: str, timeout: int = 60) -> str:
             capture_output=True,
             text=True,
             timeout=timeout,
-            cwd="/home/ubuntu/workspace",
+            cwd=cwd,
         )
         stdout = result.stdout.strip()
         stderr = result.stderr.strip()
