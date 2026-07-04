@@ -266,6 +266,8 @@ def _generate_roadmap(data: dict) -> str:
     brand_tone = data.get("brand_tone", "Professional")
 
     # Customize prompt based on brand tone
+    # Note: PDF generation uses FPDF with Helvetica font which only supports ASCII characters.
+    # Non-ASCII characters (emojis, accented characters) will appear in Markdown but not in PDF.
     tone_guidance = {
         "Professional": "Use formal, structured language. Include specific metrics, timelines, and KPIs. Be organized and methodical.",
         "Friendly": "Use warm, approachable language. Make the roadmap feel like a journey with a friend. Use encouraging language.",
