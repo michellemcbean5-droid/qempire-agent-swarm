@@ -42,11 +42,7 @@ export default function Home() {
       {/* ---------------- Hero ---------------- */}
       <section className="relative px-4 pt-32 pb-16">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-8 flex justify-center">
-            <QBot size={88} className="animate-float drop-shadow-[0_0_30px_rgba(34,224,255,0.35)]" />
-          </div>
-
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs text-cyan">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs text-cyan">
             <Crown size={13} className="text-gold" />
             Built for parents &amp; single parents · from idea to profit
           </div>
@@ -62,6 +58,23 @@ export default function Home() {
             business, pitch it, build it from the ground up, and automate everything —
             so it earns while you raise your family.
           </p>
+
+          {/* Michelle, Queen of the Deep, with Q-Bot */}
+          <div className="relative mx-auto mt-9 max-w-3xl">
+            <div className="overflow-hidden rounded-3xl border hairline shadow-2xl shadow-black/50 glow-cyan">
+              <img
+                src="/brand/michelle-hero.webp"
+                alt="Michelle, the Mermaid Queen of the Deep, holding Q-Bot"
+                className="w-full"
+                loading="eager"
+              />
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-3xl bg-gradient-to-t from-abyss to-transparent p-4">
+              <span className="inline-flex items-center gap-1.5 rounded-full glass-strong px-3 py-1 text-xs text-ink">
+                <Crown size={12} className="text-gold" /> Michelle &amp; Q-Bot · your guides from idea to empire
+              </span>
+            </div>
+          </div>
 
           <div className="mx-auto mt-9 max-w-2xl">
             <PromptBar
@@ -273,21 +286,25 @@ export default function Home() {
                 <li className="flex items-center gap-2"><span className="text-cyan">👑</span> Built for founders who want to dominate</li>
               </ul>
             </div>
-            <div className="relative grid place-items-center rounded-2xl bg-gradient-to-br from-tide/60 to-purple/20 p-10">
-              <QBot size={140} className="animate-float" />
-              <div className="mt-4 text-center">
-                <div className="font-display text-lg font-bold text-gradient-gold">Q-Bot</div>
-                <div className="text-xs text-mist">Your AI automation companion</div>
+            <div className="relative overflow-hidden rounded-2xl border hairline glow-purple">
+              <img
+                src="/brand/michelle-portrait.webp"
+                alt="Michelle, Queen of the Deep"
+                className="w-full"
+                loading="lazy"
+              />
+              <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full glass-strong px-3 py-1.5">
+                <QBot size={26} />
+                <span className="text-xs text-ink">Michelle &amp; Q-Bot</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="border-t hairline py-8 text-center text-xs text-mist">
-        <div className="flex items-center justify-center gap-2">
-          <QBot size={22} crown={false} /> Q-Empire Automation Division · Intelligent Automation. Limitless Possibilities.
-        </div>
+      <footer className="border-t hairline py-10 text-center text-xs text-mist">
+        <img src="/brand/qai-logo.webp" alt="Q-AI" className="mx-auto mb-3 h-20 w-20 rounded-2xl" loading="lazy" />
+        <div>Q-Empire Automation Division · Intelligent Automation. Limitless Possibilities.</div>
       </footer>
     </div>
   );
