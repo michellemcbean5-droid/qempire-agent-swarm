@@ -11,14 +11,36 @@ except ImportError:
     HAS_FPDF = False
 
 
+# Brand voice template used across document generation
+BRAND_VOICE_TEMPLATE = "This is being created by Q-Empire Automation, guided by Michelle (the Black Mermaid Queen of the Deep) and Q-Bot (the friendly automation agent). The tone should be empowering, clear, and welcoming to founders of color."
+
+
+def _format_error_message(error: Exception, max_length: int = 100) -> str:
+    """Format error message with exception type and message, with intelligent truncation."""
+    error_type = type(error).__name__
+    error_msg = str(error)
+    formatted = f"{error_type}: {error_msg}"
+    if len(formatted) > max_length:
+        # Truncate to max_length, but ensure we keep the exception type
+        truncated = formatted[:max_length]
+        if not truncated.endswith("..."):
+            truncated = truncated.rsplit(" ", 1)[0] + "..."
+        return truncated
+    return formatted
+
+
 def _sanitize_slug(business_name: str) -> str:
     """Sanitize business name to create safe directory slug."""
     # Convert to lowercase and replace spaces with hyphens
     slug = business_name.lower().replace(" ", "-")
     # Remove any non-alphanumeric characters except hyphens
     slug = re.sub(r"[^a-z0-9\-]", "", slug)
+    # Collapse multiple consecutive hyphens into a single hyphen
+    slug = re.sub(r"-+", "-", slug)
     # Remove leading/trailing hyphens
     slug = slug.strip("-")
+    # Enforce maximum length (50 characters for safety)
+    slug = slug[:50]
     # Ensure slug is not empty and doesn't allow path traversal
     if not slug:
         slug = "business"
@@ -107,7 +129,8 @@ Format with clear headings and paragraphs.
             return f"Business plan generated: {pdf_path} and {md_path}"
         except Exception as e:
             # If PDF generation fails, return markdown path with a note
-            return f"Business plan generated: {md_path} (PDF generation failed: {str(e)[:50]})"
+            error_msg = _format_error_message(e)
+            return f"Business plan generated: {md_path} (PDF generation failed: {error_msg})"
 
     return f"Business plan generated: {md_path}"
 
@@ -264,7 +287,7 @@ Brand Tone: {brand_tone}
 
 Tone Guidelines: {tone_description}
 
-Brand Voice: This roadmap is being created by Q-Empire Automation, guided by Michelle (the Black Mermaid Queen of the Deep) and Q-Bot (the friendly automation agent). The roadmap should be empowering, clear, and welcoming to founders of color — turning their vision into an achievable, step-by-step action plan.
+Brand Voice: {BRAND_VOICE_TEMPLATE} Turning business strategy into an easy-to-follow roadmap.
 
 Create a comprehensive 12-month roadmap with the following structure:
 
@@ -333,6 +356,7 @@ Make it practical, achievable, and inspiring."""
             return f"Roadmap generated: {pdf_path} and {md_path}"
         except Exception as e:
             # If PDF generation fails, return markdown path with a note
-            return f"Roadmap generated: {md_path} (PDF generation failed: {str(e)[:50]})"
+            error_msg = _format_error_message(e)
+            return f"Roadmap generated: {md_path} (PDF generation failed: {error_msg})"
 
     return f"Roadmap generated: {md_path}"
