@@ -5,7 +5,8 @@ import {
 import NavBar from "../components/NavBar";
 import PromptBar from "../components/PromptBar";
 import QBot from "../components/QBot";
-import { DIVISIONS, DIY_PLANS, CONNECTORS } from "../data/swarm";
+import { DIVISIONS, DIY_PLANS, AGENT_VERSIONS, DAILY_FREE_CREDITS } from "../data/swarm";
+import { FEATURED_CONNECTORS, CONNECTOR_COUNT } from "../data/connectors";
 
 const QEMPIRE_SITE = "https://qempireai.com";
 
@@ -101,13 +102,36 @@ export default function Home() {
         {/* connector marquee */}
         <div className="mx-auto mt-16 max-w-5xl overflow-hidden">
           <p className="mb-3 text-center text-[11px] uppercase tracking-[0.25em] text-mist/60">
-            Wired into 30 live connectors
+            Wired into {CONNECTOR_COUNT}+ connectors — plus a choice of maps
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            {CONNECTORS.map((c) => (
+            {FEATURED_CONNECTORS.map((c) => (
               <span key={c} className="rounded-full border hairline bg-white/[0.03] px-3 py-1 text-xs text-mist">
                 {c}
               </span>
+            ))}
+            <a href="/connectors" className="rounded-full bg-cyan/10 px-3 py-1 text-xs font-medium text-cyan hover:bg-cyan/20">
+              +{CONNECTOR_COUNT - FEATURED_CONNECTORS.length} more →
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- DIY platform features ---------------- */}
+      <section className="px-4 py-14">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { icon: Zap, tint: "text-gold", title: `${DAILY_FREE_CREDITS} free credits daily`, body: "Refilling credits every day — plus more with your plan. Use them across every task." },
+              { icon: Bot, tint: "text-cyan", title: "3 Q-Bot versions", body: `${AGENT_VERSIONS.map((v) => v.name.replace("Q-Bot ", "")).join(" · ")} — pick fast & cheap or deep & thorough.` },
+              { icon: Wrench, tint: "text-purple", title: `${CONNECTOR_COUNT}+ connectors & maps`, body: "Connect the tools you already use, from Stripe to Shopify to Google Maps." },
+              { icon: ShieldCheck, tint: "text-magenta", title: "Bring your own API key", body: "Use your own model key to stay fast and low-cost. Never locked in." },
+            ].map((f) => (
+              <div key={f.title} className="glass rounded-2xl p-5">
+                <f.icon className={f.tint} size={22} />
+                <h3 className="mt-3 font-display text-lg font-bold">{f.title}</h3>
+                <p className="mt-1 text-sm text-mist">{f.body}</p>
+              </div>
             ))}
           </div>
         </div>

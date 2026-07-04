@@ -4,6 +4,8 @@ import OceanBackground from "./components/OceanBackground";
 import Home from "./pages/Home";
 import IdeaBuilder from "./pages/IdeaBuilder";
 import Command from "./pages/Command";
+import Connectors from "./pages/Connectors";
+import Account from "./pages/Account";
 import Checkout from "./pages/Checkout";
 import Onboard from "./pages/Onboard";
 import ClientPortal from "./pages/ClientPortal";
@@ -17,6 +19,8 @@ function App() {
         <Route path="/" component={Home} />
         <Route path="/idea" component={IdeaBuilder} />
         <Route path="/command" component={Command} />
+        <Route path="/connectors" component={Connectors} />
+        <Route path="/account" component={Account} />
         <Route path="/checkout/:packageId" component={Checkout} />
         <Route path="/onboard" component={Onboard} />
         <Route path="/client-portal" component={ClientPortal} />

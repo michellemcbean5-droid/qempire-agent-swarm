@@ -194,10 +194,10 @@ export const DIY_PLANS: DiyPlan[] = [
     price: "$0",
     period: "forever",
     wasPrice: "",
-    credits: "300 daily credits + 1,000 to start",
+    credits: "500 daily credits + 1,000 to start",
     save: "Free forever",
     tagline: "Test-drive Q-Bot. Build a workflow or two.",
-    features: ["Full Q-Bot workspace", "300 refreshing credits/day", "Community templates", "1 active automation"],
+    features: ["Full Q-Bot workspace", "500 refreshing credits/day", "Community templates", "1 active automation"],
   },
   {
     id: "diy-standard",
@@ -246,4 +246,48 @@ export const SUGGESTIONS: Suggestion[] = [
   { label: "Build a website", prompt: "Design and deploy a branded 5-page website for my company.", icon: "Globe" },
   { label: "Find funding", prompt: "Find grants and prepare funding applications for my startup.", icon: "Landmark" },
   { label: "Set up automations", prompt: "Set up lead capture, follow-up and CRM automations that run 24/7.", icon: "Workflow" },
+];
+
+// ---------- Credits & agent versions (Manus-style framework) ----------
+
+// Everyone gets a daily refill of free credits on top of any plan credits.
+export const DAILY_FREE_CREDITS = 500;
+
+export interface AgentVersion {
+  id: "lite" | "standard" | "pro";
+  name: string;
+  cost: number;          // credits per task run
+  speed: string;
+  blurb: string;
+  best: string;
+  recommended?: boolean;
+}
+
+// Three pickable Q-Bot versions — pick fast+cheap or deep+thorough.
+export const AGENT_VERSIONS: AgentVersion[] = [
+  {
+    id: "lite",
+    name: "Q-Bot Lite",
+    cost: 1,
+    speed: "Fastest",
+    blurb: "Quick tasks, drafts, and simple automations.",
+    best: "Everyday small jobs",
+  },
+  {
+    id: "standard",
+    name: "Q-Bot Standard",
+    cost: 3,
+    speed: "Balanced",
+    blurb: "The all-rounder for building real deliverables.",
+    best: "Websites, plans, automations",
+    recommended: true,
+  },
+  {
+    id: "pro",
+    name: "Q-Bot Pro",
+    cost: 8,
+    speed: "Deep",
+    blurb: "Maximum reasoning for complex, high-stakes work.",
+    best: "Funding, research, multi-step builds",
+  },
 ];

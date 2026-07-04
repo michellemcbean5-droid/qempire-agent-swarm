@@ -21,6 +21,15 @@ Guided by **Michelle** (the Mermaid Queen of the Deep) and her AI companion **Q-
 The Idea Builder and the "Q-Bot's Computer" workspace call the **real** backend (FastAPI +
 LangGraph + Claude) — set `ANTHROPIC_API_KEY` and run the API for live pitches and builds.
 
+### DIY platform features
+
+- **Credits** — 500 free credits refill every day, plus monthly credits per plan. Spent per run.
+- **3 Q-Bot versions** — Lite (1 cr) · Standard (3 cr) · Pro (8 cr), pickable per run.
+- **224+ connectors** across 22 categories (CRM, payments, social, dev, AI, **Maps & Location**…),
+  browsable at `/connectors`.
+- **Bring your own API key** — customers add their own model key (`/account`) so inference cost
+  stays on them; a shared low-cost model is the metered default. **Customers pay before builds run.**
+
 ## Architecture
 
 **Tri-Agent System (Manus Clone):**

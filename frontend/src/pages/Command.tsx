@@ -5,11 +5,12 @@ import {
   Sparkles, PlugZap, AlertTriangle, X,
 } from "lucide-react";
 import QBot from "../components/QBot";
-import { DIVISIONS } from "../data/swarm";
+import { DIVISIONS, AGENT_VERSIONS } from "../data/swarm";
+import { useAccount } from "../lib/account";
 import { startBuild, getBuild, API_BASE, type BuildState } from "../lib/api";
 
 type Tab = "computer" | "swarm" | "files";
-type Status = "connecting" | "running" | "completed" | "failed" | "offline";
+type Status = "connecting" | "running" | "completed" | "failed" | "offline" | "nocredits";
 
 const accentDot: Record<string, string> = {
   cyan: "bg-cyan", purple: "bg-purple", magenta: "bg-magenta", gold: "bg-gold", blue: "bg-[#5b9bff]",
@@ -32,6 +33,8 @@ export default function Command() {
       ? new URLSearchParams(window.location.search).get("q") || "Build my business blueprint, brand and website."
       : "Build my business.";
 
+  const { account, update, spend } = useAccount();
+  const version = AGENT_VERSIONS.find((v) => v.id === account.version) || AGENT_VERSIONS[1];
   const [status, setStatus] = useState<Status>("connecting");
   const [build, setBuild] = useState<BuildState | null>(null);
   const [tab, setTab] = useState<Tab>("computer");
@@ -48,9 +51,14 @@ export default function Command() {
 
   const begin = useCallback(async () => {
     stopPolling();
-    setStatus("connecting");
     setBuild(null);
     setErrorMsg("");
+    // Credits are spent per run, based on the chosen Q-Bot version.
+    if (!spend(version.cost)) {
+      setStatus("nocredits");
+      return;
+    }
+    setStatus("connecting");
     try {
       const id = await startBuild("BUILD_BLUEPRINT", {
         business_name: task.replace(/^Build\s+/i, "").slice(0, 80),
@@ -59,6 +67,8 @@ export default function Command() {
         target_audience: "",
         elevator_pitch: task,
         client_email: "",
+        version: version.id,
+        api_key: account.apiKey || undefined,
       });
       setStatus("running");
       pollRef.current = window.setInterval(async () => {
@@ -77,7 +87,7 @@ export default function Command() {
       setStatus("offline");
       setErrorMsg(e instanceof Error ? e.message : "Could not reach the engine.");
     }
-  }, [task]);
+  }, [task, spend, version.cost, version.id, account.apiKey]);
 
   useEffect(() => {
     void begin();
@@ -98,7 +108,8 @@ export default function Command() {
     status === "connecting" ? "Connecting…" :
     status === "running" ? "Working…" :
     status === "completed" ? "Task complete" :
-    status === "failed" ? "Needs attention" : "Engine offline";
+    status === "failed" ? "Needs attention" :
+    status === "nocredits" ? "Out of credits" : "Engine offline";
 
   return (
     <div className="flex h-screen flex-col">
@@ -108,11 +119,25 @@ export default function Command() {
           <ChevronLeft size={16} /> <QBot size={26} /> <span className="hidden sm:inline">Q-Bot's Computer</span>
         </button>
         <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs ${status === "completed" ? "bg-cyan/15 text-cyan" : status === "offline" || status === "failed" ? "bg-magenta/15 text-magenta" : "glass text-ink"}`}>
-            <span className={`h-2 w-2 rounded-full ${status === "completed" ? "bg-cyan" : status === "offline" || status === "failed" ? "bg-magenta" : "bg-gold animate-pulse-ring"}`} />
+          {/* Q-Bot version picker */}
+          <select
+            value={account.version}
+            onChange={(e) => update({ version: e.target.value as "lite" | "standard" | "pro" })}
+            className="hidden rounded-full glass px-3 py-1.5 text-xs text-ink focus:outline-none sm:block"
+            title="Q-Bot version"
+          >
+            {AGENT_VERSIONS.map((v) => (
+              <option key={v.id} value={v.id} className="bg-abyss">{v.name} · {v.cost}cr</option>
+            ))}
+          </select>
+          <button onClick={() => navigate("/account")} className="inline-flex items-center gap-1.5 rounded-full glass px-3 py-1.5 text-xs text-ink" title="Credits">
+            <span className="text-gold">⚡</span> {account.credits.toLocaleString()}
+          </button>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs ${status === "completed" ? "bg-cyan/15 text-cyan" : status === "offline" || status === "failed" || status === "nocredits" ? "bg-magenta/15 text-magenta" : "glass text-ink"}`}>
+            <span className={`h-2 w-2 rounded-full ${status === "completed" ? "bg-cyan" : status === "offline" || status === "failed" || status === "nocredits" ? "bg-magenta" : "bg-gold animate-pulse-ring"}`} />
             {statusLabel}
           </span>
-          <button onClick={() => navigate("/client-portal")} className="rounded-full btn-brand px-4 py-1.5 text-xs font-semibold text-white">
+          <button onClick={() => navigate("/client-portal")} className="hidden rounded-full btn-brand px-4 py-1.5 text-xs font-semibold text-white sm:block">
             Open portal
           </button>
         </div>
@@ -196,6 +221,22 @@ export default function Command() {
           </div>
 
           <div ref={logRef} className="min-h-0 flex-1 overflow-y-auto p-4">
+            {/* out of credits */}
+            {status === "nocredits" && (
+              <div className="mx-auto mt-10 max-w-md rounded-2xl glass-strong p-6 text-center">
+                <span className="text-3xl">⚡</span>
+                <h3 className="mt-2 font-display text-lg font-bold">Out of credits</h3>
+                <p className="mt-2 text-sm text-mist">
+                  {version.name} costs {version.cost} credits per run. You have {account.credits.toLocaleString()}.
+                  Credits refill to 500 free every day, or upgrade your plan for more.
+                </p>
+                <div className="mt-4 flex justify-center gap-2">
+                  <button onClick={() => navigate("/account")} className="rounded-full btn-brand px-4 py-2 text-xs font-semibold text-white">Manage credits</button>
+                  <button onClick={() => update({ version: "lite" })} className="rounded-full glass px-4 py-2 text-xs font-semibold text-ink">Use Q-Bot Lite (1cr)</button>
+                </div>
+              </div>
+            )}
+
             {/* offline state — honest, actionable, no fake output */}
             {status === "offline" && (
               <div className="mx-auto mt-10 max-w-md rounded-2xl glass-strong p-6 text-center">
@@ -213,7 +254,7 @@ export default function Command() {
               </div>
             )}
 
-            {tab === "computer" && status !== "offline" && (
+            {tab === "computer" && status !== "offline" && status !== "nocredits" && (
               <div className="font-mono text-[12.5px] leading-relaxed">
                 <div className="text-mist/60">q-empire@swarm ~ % run --task "{task.slice(0, 48)}{task.length > 48 ? "…" : ""}"</div>
                 {events.map((e, i) => (
@@ -228,7 +269,7 @@ export default function Command() {
               </div>
             )}
 
-            {tab === "swarm" && status !== "offline" && (
+            {tab === "swarm" && status !== "offline" && status !== "nocredits" && (
               <div className="space-y-4">
                 <p className="text-xs text-mist">The 50-agent workforce Q-Bot can dispatch across your build.</p>
                 {DIVISIONS.map((d) => (
@@ -247,7 +288,7 @@ export default function Command() {
               </div>
             )}
 
-            {tab === "files" && status !== "offline" && (
+            {tab === "files" && status !== "offline" && status !== "nocredits" && (
               <div>
                 {status !== "completed" && <div className="text-sm text-mist">Deliverables appear here once the build completes.</div>}
                 {status === "completed" && (
