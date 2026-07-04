@@ -133,14 +133,19 @@ export default function Onboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, package_id: pkg.id }),
       });
-      await response.json();
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: "Submission failed" }));
+        throw new Error(errorData.detail || "Submission failed");
+      }
+
       login(formData.email, pkg.id, formData.business_name);
       toast.success("Q-Bot is building your empire!");
       setTimeout(() => navigate("/client-portal"), 2000);
     } catch (error) {
-      login(formData.email, pkg.id, formData.business_name);
-      toast.success("Submitted! Redirecting to your dashboard...");
-      setTimeout(() => navigate("/client-portal"), 2000);
+      const message = error instanceof Error ? error.message : "Submission failed";
+      toast.error(message);
+      setLoading(false);
     }
   };
 

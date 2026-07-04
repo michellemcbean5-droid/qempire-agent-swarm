@@ -30,10 +30,12 @@ export default function ClientPortal() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      // For demo purposes, allow viewing the portal without auth
-      // In production, redirect to login
+      // In production, redirect to a dedicated login page.
+      // For the self-service demo, users land here after onboarding.
+      // Uncomment the line below once authentication is required:
+      // navigate("/");
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="min-h-screen flex bg-[#0A0A1A]">

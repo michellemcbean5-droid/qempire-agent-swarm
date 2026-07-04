@@ -140,7 +140,7 @@ async def receive_onboarding(request: Request):
 
     # Validate package ID
     if package_id not in PACKAGES:
-        raise HTTPException(status_code=400, detail=f"Invalid package_id: {package_id}")
+        raise HTTPException(status_code=400, detail="Invalid package_id")
 
     package_config = PACKAGES[package_id]
 
