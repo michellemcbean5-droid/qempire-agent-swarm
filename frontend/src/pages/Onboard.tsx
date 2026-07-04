@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 
-const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL || "http://localhost:8080";
+const WEBHOOK_URL = (import.meta as any).env?.VITE_WEBHOOK_URL || "http://localhost:8080";
 
 const industries = ["Technology", "Health & Wellness", "E-commerce", "Professional Services", "Creative", "Education", "Food & Beverage", "Real Estate", "Other"];
 const automationOptions = [
@@ -56,7 +56,7 @@ export default function Onboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, package_id: "foundation" }),
       });
-      const data = await response.json();
+      await response.json();
       toast.success("Q-Bot is building your empire!");
       setTimeout(() => navigate("/client-portal"), 2000);
     } catch (error) {

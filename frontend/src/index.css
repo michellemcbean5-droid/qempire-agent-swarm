@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-qempire-dark: #0A0A1A;
+  --color-qempire-blue: #4169E1;
+  --color-qempire-purple: #BF00FF;
+  --color-qempire-cyan: #00FFFF;
+  --color-qempire-pink: #FF007F;
+  --color-qempire-gold: #D4AF37;
+}
+
+body {
+  background-color: #0A0A1A;
+  color: white;
+}
