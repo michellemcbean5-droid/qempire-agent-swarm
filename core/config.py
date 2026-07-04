@@ -10,6 +10,19 @@ LLM_MODEL = "claude-sonnet-4-20250514"
 LLM_TEMPERATURE = 0.3
 LLM_MAX_TOKENS = 4096
 
+# Kimi / Moonshot (default model for paid users — OpenAI-compatible API).
+# Provide KIMI_API_KEY (a.k.a. MOONSHOT_API_KEY) to run the swarm on Kimi.
+KIMI_API_KEY = os.getenv("KIMI_API_KEY", "") or os.getenv("MOONSHOT_API_KEY", "")
+KIMI_BASE_URL = os.getenv("KIMI_BASE_URL", "https://api.moonshot.ai/v1")
+KIMI_MODEL = os.getenv("KIMI_MODEL", "kimi-k2.5")
+
+# ---- Credit economics (see docs/PRICING_ECONOMICS.md) ----
+# 1 credit meters this many blended Kimi tokens. Charging ceil(tokens / TOKENS_PER_CREDIT)
+# credits per run keeps every task at/above the target markup by construction.
+TOKENS_PER_CREDIT = int(os.getenv("TOKENS_PER_CREDIT", "1700"))
+CREDIT_SELL_USD = float(os.getenv("CREDIT_SELL_USD", "0.0035"))   # our price per credit (30% below Manus $0.005)
+TARGET_MARKUP = float(os.getenv("TARGET_MARKUP", "0.45"))         # 45% markup goal
+
 # GitHub Configuration
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 GITHUB_USERNAME = os.getenv("GITHUB_USERNAME", "")

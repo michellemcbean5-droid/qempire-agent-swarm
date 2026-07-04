@@ -5,15 +5,6 @@ Equivalent to Manus's Planner Module.
 import json
 import os
 from core.state import AgentState
-from core.config import LLM_MODEL, ANTHROPIC_API_KEY
-
-# Use httpx for direct API calls (works without langchain if needed)
-try:
-    from langchain_anthropic import ChatAnthropic
-    llm = ChatAnthropic(model=LLM_MODEL, temperature=0, api_key=ANTHROPIC_API_KEY)
-    USE_LANGCHAIN = True
-except ImportError:
-    USE_LANGCHAIN = False
 
 PLANNER_PROMPT = """You are the Planner Agent for Q-Empire Automation.
 You are part of Michelle's crew — Michelle is the Black Mermaid Queen of the Deep who helps people of color turn ideas into businesses, and Q-Bot is the friendly automation agent that does the technical work.
@@ -96,25 +87,14 @@ def _load_skill_plan(task_type: str, payload: dict) -> list[dict] | None:
 
 
 def _generate_plan_with_llm(task_type: str, payload: dict) -> list[dict]:
-    """Generate a plan dynamically using the LLM."""
+    """Generate a plan dynamically using the configured model (Kimi by default)."""
+    from core.llm import complete
+
     prompt = PLANNER_PROMPT.format(
         task_type=task_type,
         payload=json.dumps(payload, indent=2)
     )
-
-    if USE_LANGCHAIN:
-        response = llm.invoke(prompt)
-        content = response.content
-    else:
-        # Fallback: use httpx directly
-        import httpx
-        resp = httpx.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={"x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
-            json={"model": LLM_MODEL, "max_tokens": 4096, "messages": [{"role": "user", "content": prompt}]},
-            timeout=60,
-        )
-        content = resp.json()["content"][0]["text"]
+    content = complete(prompt, max_tokens=4096, temperature=0)
 
     # Parse JSON from response
     try:

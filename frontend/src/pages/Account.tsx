@@ -72,6 +72,10 @@ export default function Account() {
           <p className="mt-2 flex items-center gap-1.5 text-xs text-mist">
             <Sparkles size={12} className="text-cyan" /> Refills to {DAILY_FREE_CREDITS} free credits every day{plan && plan.id !== "diy-free" ? `, plus ${plan.credits} with your plan` : ""}.
           </p>
+          <p className="mt-1 text-[11px] text-mist/70">
+            Same credit value as the big agent tools, priced ~30% cheaper. Metered to real usage —
+            e.g. a quick task ≈ 20 credits, a full website build ≈ 250 credits.
+          </p>
         </section>
 
         {/* Q-Bot version */}
@@ -107,7 +111,7 @@ export default function Account() {
           </div>
           <p className="mt-1 text-xs text-mist">
             Bring your own AI key so you're never rate-limited and you keep costs low. If you don't add one,
-            Q-Empire uses a shared low-cost model (metered in credits).
+            Q-Empire runs on a shared low-cost <span className="text-ink">Kimi</span> model, metered in credits.
           </p>
           <div className="mt-4 flex gap-2">
             <div className="glass flex flex-1 items-center gap-2 rounded-xl px-3 py-2.5">
