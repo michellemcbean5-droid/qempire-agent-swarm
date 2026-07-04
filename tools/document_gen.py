@@ -271,7 +271,7 @@ def _generate_roadmap(data: dict) -> str:
         "Friendly": "Use warm, approachable language. Make the roadmap feel like a journey with a friend. Use encouraging language.",
         "Bold": "Use confident, action-oriented language. Emphasize innovation and disruption. Make it inspiring and ambitious.",
         "Luxurious": "Use sophisticated, premium language. Focus on exclusivity, quality, and prestige. Emphasize high-end positioning.",
-        "Playful": "Use creative, fun language. Include emojis and creative formatting. Make it engaging and entertaining.",
+        "Playful": "Use creative, fun language with emojis for emphasis. Use emojis to make it engaging and entertaining. (Note: Emojis will display in Markdown but not in PDF format.)",
         "Minimal": "Use clean, concise language. Avoid jargon. Focus on essentials. Keep it simple and direct.",
     }
 
@@ -341,7 +341,8 @@ Make it practical, achievable, and inspiring."""
 
             for line in content.split("\n"):
                 # Remove emojis and special Unicode characters for PDF compatibility
-                # FPDF with Helvetica font doesn't support extended Unicode
+                # FPDF with Helvetica font doesn't support extended Unicode.
+                # Emojis will still appear in the Markdown version for Playful brand tone.
                 safe_line = line.encode("ascii", "ignore").decode("ascii")
                 
                 if safe_line.startswith("#"):
