@@ -17,6 +17,7 @@ def generate_document(doc_type: str, data: dict) -> str:
         "pitch_deck": _generate_pitch_deck,
         "funding_strategy": _generate_funding_strategy,
         "branding_kit": _generate_branding_kit,
+        "roadmap": _generate_roadmap,
     }
 
     generator = generators.get(doc_type)
@@ -215,3 +216,106 @@ Include:
     file_write(md_path, f"# Brand Identity Guide: {business_name}\n\n{content}")
 
     return f"Branding kit generated: {md_path}"
+
+
+def _generate_roadmap(data: dict) -> str:
+    """Generate a strategic business roadmap tailored to the brand theme."""
+    business_name = data.get("business_name", "My Business")
+    industry = data.get("industry", "General")
+    target_audience = data.get("target_audience", "General consumers")
+    elevator_pitch = data.get("elevator_pitch", "")
+    brand_tone = data.get("brand_tone", "Professional")
+
+    # Customize prompt based on brand tone
+    tone_guidance = {
+        "Professional": "Use formal, structured language. Include specific metrics, timelines, and KPIs. Be organized and methodical.",
+        "Friendly": "Use warm, approachable language. Make the roadmap feel like a journey with a friend. Use encouraging language.",
+        "Bold": "Use confident, action-oriented language. Emphasize innovation and disruption. Make it inspiring and ambitious.",
+        "Luxurious": "Use sophisticated, premium language. Focus on exclusivity, quality, and prestige. Emphasize high-end positioning.",
+        "Playful": "Use creative, fun language. Include emojis and creative formatting. Make it engaging and entertaining.",
+        "Minimal": "Use clean, concise language. Avoid jargon. Focus on essentials. Keep it simple and direct.",
+    }
+
+    tone_description = tone_guidance.get(brand_tone, tone_guidance["Professional"])
+
+    prompt = f"""Create a detailed 12-month strategic roadmap for:
+
+Business: {business_name}
+Industry: {industry}
+Target Audience: {target_audience}
+Value Proposition: {elevator_pitch}
+Brand Tone: {brand_tone}
+
+Tone Guidelines: {tone_description}
+
+Brand Voice: This roadmap is being created by Q-Empire Automation, guided by Michelle (the Black Mermaid Queen of the Deep) and Q-Bot (the friendly automation agent). The roadmap should be empowering, clear, and welcoming to founders of color — turning their vision into an achievable, step-by-step action plan.
+
+Create a comprehensive 12-month roadmap with the following structure:
+
+**Phase 1: Foundation (Months 1-2)**
+- Key milestones and quick wins
+- Essential setup tasks
+- First 30, 60, and 90-day targets
+
+**Phase 2: Growth (Months 3-6)**
+- Customer acquisition strategies
+- Product/service optimization
+- Revenue targets
+
+**Phase 3: Scale (Months 7-9)**
+- Market expansion plans
+- Team building considerations
+- Infrastructure scaling
+
+**Phase 4: Optimization (Months 10-12)**
+- Profitability improvements
+- Customer retention strategies
+- Next-year planning
+
+For each phase, include:
+- Specific, measurable objectives
+- Key activities and deliverables
+- Resource requirements
+- Success metrics and KPIs
+- Risk mitigation strategies
+
+Make it practical, achievable, and inspiring."""
+
+    content = generate_content(prompt, max_tokens=6000)
+    slug = business_name.lower().replace(" ", "-")
+    output_dir = f"/home/ubuntu/output/documents/{slug}"
+    os.makedirs(output_dir, exist_ok=True)
+
+    md_path = f"{output_dir}/roadmap.md"
+    file_write(md_path, f"# Strategic Roadmap: {business_name}\n\n{content}")
+
+    # Save as PDF if fpdf available
+    if HAS_FPDF:
+        try:
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_auto_page_break(auto=True, margin=15)
+            pdf.set_font("Helvetica", "B", 16)
+            pdf.cell(0, 10, f"Strategic Roadmap: {business_name}", ln=True)
+            pdf.set_font("Helvetica", "", 11)
+            pdf.ln(5)
+
+            for line in content.split("\n"):
+                if line.startswith("#"):
+                    pdf.set_font("Helvetica", "B", 14)
+                    pdf.cell(0, 8, line.replace("#", "").strip(), ln=True)
+                    pdf.set_font("Helvetica", "", 11)
+                elif line.startswith("**") and line.endswith("**"):
+                    pdf.set_font("Helvetica", "B", 12)
+                    pdf.cell(0, 7, line.replace("**", "").strip(), ln=True)
+                    pdf.set_font("Helvetica", "", 11)
+                else:
+                    pdf.multi_cell(0, 6, line)
+
+            pdf_path = f"{output_dir}/roadmap.pdf"
+            pdf.output(pdf_path)
+            return f"Roadmap generated: {pdf_path} and {md_path}"
+        except Exception:
+            pass
+
+    return f"Roadmap generated: {md_path}"
