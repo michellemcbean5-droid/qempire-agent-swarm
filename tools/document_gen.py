@@ -1,5 +1,6 @@
 """Document generation tool — creates PDFs and presentations."""
 import os
+import re
 from tools.content_gen import generate_content
 from tools.file_system import file_write
 
@@ -8,6 +9,20 @@ try:
     HAS_FPDF = True
 except ImportError:
     HAS_FPDF = False
+
+
+def _sanitize_slug(business_name: str) -> str:
+    """Sanitize business name to create safe directory slug."""
+    # Convert to lowercase and replace spaces with hyphens
+    slug = business_name.lower().replace(" ", "-")
+    # Remove any non-alphanumeric characters except hyphens
+    slug = re.sub(r"[^a-z0-9\-]", "", slug)
+    # Remove leading/trailing hyphens
+    slug = slug.strip("-")
+    # Ensure slug is not empty and doesn't allow path traversal
+    if not slug:
+        slug = "business"
+    return slug
 
 
 def generate_document(doc_type: str, data: dict) -> str:
@@ -60,7 +75,7 @@ Format with clear headings and paragraphs.
 """
 
     content = generate_content(prompt, max_tokens=8000)
-    slug = business_name.lower().replace(" ", "-")
+    slug = _sanitize_slug(business_name)
     output_dir = f"/home/ubuntu/output/documents/{slug}"
     os.makedirs(output_dir, exist_ok=True)
 
@@ -90,8 +105,9 @@ Format with clear headings and paragraphs.
             pdf_path = f"{output_dir}/business_plan.pdf"
             pdf.output(pdf_path)
             return f"Business plan generated: {pdf_path} and {md_path}"
-        except Exception:
-            pass
+        except Exception as e:
+            # If PDF generation fails, return markdown path with a note
+            return f"Business plan generated: {md_path} (PDF generation failed: {str(e)[:50]})"
 
     return f"Business plan generated: {md_path}"
 
@@ -132,7 +148,7 @@ Be specific and compelling. Use real industry data where possible.
 """
 
     content = generate_content(prompt, max_tokens=6000)
-    slug = business_name.lower().replace(" ", "-")
+    slug = _sanitize_slug(business_name)
     output_dir = f"/home/ubuntu/output/documents/{slug}"
     os.makedirs(output_dir, exist_ok=True)
 
@@ -169,7 +185,7 @@ Be specific with grant names, amounts, and deadlines where possible.
 """
 
     content = generate_content(prompt, max_tokens=6000)
-    slug = business_name.lower().replace(" ", "-")
+    slug = _sanitize_slug(business_name)
     output_dir = f"/home/ubuntu/output/documents/{slug}"
     os.makedirs(output_dir, exist_ok=True)
 
@@ -208,7 +224,7 @@ Include:
 """
 
     content = generate_content(prompt, max_tokens=4000)
-    slug = business_name.lower().replace(" ", "-")
+    slug = _sanitize_slug(business_name)
     output_dir = f"/home/ubuntu/output/documents/{slug}"
     os.makedirs(output_dir, exist_ok=True)
 
@@ -282,7 +298,7 @@ For each phase, include:
 Make it practical, achievable, and inspiring."""
 
     content = generate_content(prompt, max_tokens=6000)
-    slug = business_name.lower().replace(" ", "-")
+    slug = _sanitize_slug(business_name)
     output_dir = f"/home/ubuntu/output/documents/{slug}"
     os.makedirs(output_dir, exist_ok=True)
 
@@ -315,7 +331,8 @@ Make it practical, achievable, and inspiring."""
             pdf_path = f"{output_dir}/roadmap.pdf"
             pdf.output(pdf_path)
             return f"Roadmap generated: {pdf_path} and {md_path}"
-        except Exception:
-            pass
+        except Exception as e:
+            # If PDF generation fails, return markdown path with a note
+            return f"Roadmap generated: {md_path} (PDF generation failed: {str(e)[:50]})"
 
     return f"Roadmap generated: {md_path}"

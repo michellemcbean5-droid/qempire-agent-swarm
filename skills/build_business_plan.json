@@ -59,7 +59,7 @@
       "params_template": {
         "to": "{client_email}",
         "subject": "Your Business Blueprint is Ready! 📋",
-        "body": "Michelle and Q-Bot have finished your business plan, pitch deck, and strategic roadmap. Log into your Client Portal to download them and review the market research and your personalized roadmap."
+        "body": "Michelle and Q-Bot have finished your business plan, pitch deck, strategic roadmap, and market research. Log into your Client Portal to download and review all your deliverables!"
       },
       "description": "Notify client that blueprint is complete"
     }
