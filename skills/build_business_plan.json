@@ -1,6 +1,6 @@
 {
   "skill_name": "build_business_plan",
-  "description": "Generate a complete business plan, pitch deck, and market research",
+  "description": "Generate a complete business plan, pitch deck, strategic roadmap, and market research",
   "trigger_task_type": "BUILD_BLUEPRINT",
   "steps": [
     {
@@ -40,11 +40,26 @@
     },
     {
       "step": 4,
+      "action": "generate_document",
+      "params_template": {
+        "doc_type": "roadmap",
+        "data": {
+          "business_name": "{business_name}",
+          "industry": "{industry}",
+          "target_audience": "{target_audience}",
+          "elevator_pitch": "{elevator_pitch}",
+          "brand_tone": "{brand_tone}"
+        }
+      },
+      "description": "Generate 12-month strategic roadmap with theme-specific tone"
+    },
+    {
+      "step": 5,
       "action": "send_email",
       "params_template": {
         "to": "{client_email}",
         "subject": "Your Business Blueprint is Ready! 📋",
-        "body": "Michelle and Q-Bot have finished your business plan and pitch deck. Log into your Client Portal to download them and review the market research."
+        "body": "Michelle and Q-Bot have finished your business plan, pitch deck, strategic roadmap, and market research. Log into your Client Portal to download and review all your deliverables!"
       },
       "description": "Notify client that blueprint is complete"
     }
