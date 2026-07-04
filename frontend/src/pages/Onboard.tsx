@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ArrowRight, ArrowLeft, AlertCircle } from "lucide-react";
+import { ArrowRight, ArrowLeft, AlertCircle } from "lucide-react";
 import Navigation from "../components/Navigation";
 import StepIndicator from "../components/StepIndicator";
 import AIChatAssistant from "../components/AIChatAssistant";
