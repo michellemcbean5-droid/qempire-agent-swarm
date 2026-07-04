@@ -1,15 +1,180 @@
 @import "tailwindcss";
 
 @theme {
-  --color-qempire-dark: #0A0A1A;
-  --color-qempire-blue: #4169E1;
-  --color-qempire-purple: #BF00FF;
-  --color-qempire-cyan: #00FFFF;
-  --color-qempire-pink: #FF007F;
-  --color-qempire-gold: #D4AF37;
+  /* Q-Empire underwater / bioluminescent brand */
+  --color-abyss: #030814;
+  --color-deep: #060f24;
+  --color-tide: #0a1a3a;
+  --color-gold: #f5c542;
+  --color-gold-deep: #d4af37;
+  --color-cyan: #22e0ff;
+  --color-purple: #a855f7;
+  --color-magenta: #ff2d95;
+  --color-ink: #eaf2ff;
+  --color-mist: #9fb2d0;
+
+  --font-display: "Cinzel", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background-color: #030814;
+  color: #eaf2ff;
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background-color: #0A0A1A;
-  color: white;
+  /* Deep-ocean gradient with bioluminescent light shafts */
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(34, 224, 255, 0.10), transparent 55%),
+    radial-gradient(90% 60% at 85% 10%, rgba(168, 85, 247, 0.12), transparent 60%),
+    radial-gradient(80% 70% at 10% 100%, rgba(255, 45, 149, 0.08), transparent 55%),
+    linear-gradient(180deg, #030814 0%, #050f22 45%, #030a18 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
+
+/* ---------- Reusable brand utilities ---------- */
+
+.font-display {
+  font-family: "Cinzel", Georgia, serif;
+  letter-spacing: 0.01em;
+}
+
+.text-gradient-brand {
+  background: linear-gradient(100deg, #22e0ff 0%, #a855f7 50%, #ff2d95 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(100deg, #ffe89a 0%, #f5c542 45%, #d4af37 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Glassmorphic surface used across panels/cards */
+.glass {
+  background: linear-gradient(180deg, rgba(18, 34, 66, 0.55), rgba(8, 18, 38, 0.45));
+  border: 1px solid rgba(120, 180, 255, 0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.glass-strong {
+  background: linear-gradient(180deg, rgba(20, 38, 74, 0.72), rgba(8, 18, 38, 0.62));
+  border: 1px solid rgba(120, 180, 255, 0.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.hairline {
+  border-color: rgba(120, 180, 255, 0.14);
+}
+
+/* Bioluminescent glows */
+.glow-cyan {
+  box-shadow: 0 0 0 1px rgba(34, 224, 255, 0.3), 0 0 24px rgba(34, 224, 255, 0.28);
+}
+.glow-gold {
+  box-shadow: 0 0 0 1px rgba(245, 197, 66, 0.35), 0 0 26px rgba(245, 197, 66, 0.25);
+}
+.glow-purple {
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.32), 0 0 26px rgba(168, 85, 247, 0.28);
+}
+
+.btn-brand {
+  background: linear-gradient(100deg, #2563eb 0%, #a855f7 55%, #ff2d95 100%);
+  box-shadow: 0 6px 26px rgba(120, 60, 220, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.btn-brand:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow: 0 10px 34px rgba(120, 60, 220, 0.55);
+}
+
+.btn-gold {
+  background: linear-gradient(100deg, #ffe89a 0%, #f5c542 50%, #d4af37 100%);
+  color: #10131f;
+  box-shadow: 0 6px 24px rgba(245, 197, 66, 0.32);
+  transition: transform 0.15s ease, filter 0.2s ease;
+}
+.btn-gold:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+/* ---------- Animations ---------- */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-float { animation: float 6s ease-in-out infinite; }
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-16px) translateX(6px); }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(34, 224, 255, 0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(34, 224, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 224, 255, 0); }
+}
+.animate-pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes rise {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0.6; }
+}
+
+/* Rising bubbles background layer */
+.bubble {
+  position: absolute;
+  bottom: -40px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), rgba(34,224,255,0.08));
+  border: 1px solid rgba(180, 230, 255, 0.25);
+  animation: bubble-rise linear infinite;
+  pointer-events: none;
+}
+@keyframes bubble-rise {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(-105vh) translateX(24px); opacity: 0; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.animate-blink { animation: blink 1.1s steps(1) infinite; }
+
+/* Scrollbars tuned to the theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 180, 255, 0.25) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(120, 180, 255, 0.22);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-track { background: transparent; }

@@ -1,22 +1,34 @@
 import { Switch, Route } from "wouter";
 import { Toaster } from "sonner";
+import OceanBackground from "./components/OceanBackground";
 import Home from "./pages/Home";
+import IdeaBuilder from "./pages/IdeaBuilder";
+import Command from "./pages/Command";
 import Checkout from "./pages/Checkout";
 import Onboard from "./pages/Onboard";
 import ClientPortal from "./pages/ClientPortal";
 
 function App() {
   return (
-    <div className="min-h-screen bg-[#0A0A1A] text-white font-body">
-      <Toaster richColors position="top-right" />
+    <div className="relative min-h-screen font-body text-ink">
+      <OceanBackground />
+      <Toaster theme="dark" richColors position="top-right" />
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/idea" component={IdeaBuilder} />
+        <Route path="/command" component={Command} />
         <Route path="/checkout/:packageId" component={Checkout} />
         <Route path="/onboard" component={Onboard} />
         <Route path="/client-portal" component={ClientPortal} />
         <Route>
-          <div className="flex items-center justify-center min-h-screen">
-            <h1 className="text-4xl font-display font-bold">404 — Page Not Found</h1>
+          <div className="flex min-h-screen items-center justify-center px-4 text-center">
+            <div>
+              <div className="font-display text-6xl text-gradient-gold">404</div>
+              <p className="mt-3 text-mist">This current has pulled you off the map.</p>
+              <a href="/" className="mt-6 inline-block rounded-full btn-brand px-6 py-2.5 font-semibold text-white">
+                Back to the surface
+              </a>
+            </div>
           </div>
         </Route>
       </Switch>

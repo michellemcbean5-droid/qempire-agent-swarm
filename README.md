@@ -1,6 +1,21 @@
 # Q-Empire Agent Swarm
 
-An autonomous AI agent system that builds entire businesses on autopilot. Clients pay, fill out an onboarding wizard, and the agent swarm automatically generates their website, business plan, pitch deck, automations, and funding strategy.
+**Helping parents & single parents go from an idea to profit ($10K–$50K/month).**
+
+A busy parent has a spark but no time. Q-Empire turns that spark into a real business: an
+interactive **Idea Builder** shapes it, Q-Bot returns a **pitch** with a 90-day plan, then a
+**50-agent swarm** builds it from the ground up and **automates everything** — 24/7.
+
+Guided by **Michelle** (the Mermaid Queen of the Deep) and her AI companion **Q-Bot**.
+
+> See [`docs/QEMPIRE_MASTER_OVERVIEW.md`](docs/QEMPIRE_MASTER_OVERVIEW.md) for the consolidated
+> single source of truth (mission, brand, offers, the full swarm, and architecture).
+
+### Two ways to build
+
+- **Done-For-You** — pay once, the swarm builds and automates everything (packages below).
+- **Do-It-Yourself** — drive Q-Bot yourself on a low monthly plan ($0 / $29 / $179), priced
+  below the big-name AI-agent tools.
 
 ## Architecture
 
