@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import {
   Check, Crown, Zap, Waves, ArrowRight, Bot, Wrench, Sparkles, ShieldCheck,
@@ -6,7 +5,9 @@ import {
 import NavBar from "../components/NavBar";
 import PromptBar from "../components/PromptBar";
 import QBot from "../components/QBot";
-import { DIVISIONS, PACKAGES, DIY_PLANS, CONNECTORS } from "../data/swarm";
+import { DIVISIONS, DIY_PLANS, CONNECTORS } from "../data/swarm";
+
+const QEMPIRE_SITE = "https://qempireai.com";
 
 const accentText: Record<string, string> = {
   cyan: "text-cyan",
@@ -25,10 +26,8 @@ const accentDot: Record<string, string> = {
 
 export default function Home() {
   const [, navigate] = useLocation();
-  const [mode, setMode] = useState<"dfy" | "diy">("dfy");
 
-  const jumpToPricing = (m: "dfy" | "diy") => {
-    setMode(m);
+  const jumpToPricing = () => {
     document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -124,9 +123,9 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button onClick={() => jumpToPricing("dfy")} className="mt-6 inline-flex items-center gap-1.5 rounded-full btn-brand px-5 py-2.5 text-sm font-semibold text-white">
-                See packages <ArrowRight size={15} />
-              </button>
+              <a href={QEMPIRE_SITE} target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-1.5 rounded-full btn-brand px-5 py-2.5 text-sm font-semibold text-white">
+                Get it done for you at qempireai.com <ArrowRight size={15} />
+              </a>
             </div>
 
             <div className="glass-strong rounded-3xl p-7 glow-cyan">
@@ -145,8 +144,8 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <button onClick={() => jumpToPricing("diy")} className="mt-6 inline-flex items-center gap-1.5 rounded-full glass px-5 py-2.5 text-sm font-semibold text-ink hover:border-white/25">
-                See self-serve plans <ArrowRight size={15} />
+              <button onClick={jumpToPricing} className="mt-6 inline-flex items-center gap-1.5 rounded-full glass px-5 py-2.5 text-sm font-semibold text-ink hover:border-white/25">
+                See self-serve pricing <ArrowRight size={15} />
               </button>
             </div>
           </div>
@@ -198,93 +197,59 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ---------------- Pricing ---------------- */}
+      {/* ---------------- Pricing (DIY, self-serve) ---------------- */}
       <section id="pricing" className="scroll-mt-20 px-4 py-20">
         <div className="mx-auto max-w-6xl">
-          <h2 className="text-center font-display text-3xl font-bold sm:text-4xl">Pricing that pays for itself</h2>
-
-          <div className="mt-6 flex justify-center">
-            <div className="inline-flex rounded-full glass p-1">
-              <button
-                onClick={() => setMode("dfy")}
-                className={`rounded-full px-5 py-2 text-sm font-semibold transition ${mode === "dfy" ? "btn-brand text-white" : "text-mist hover:text-ink"}`}
-              >
-                Done-For-You
-              </button>
-              <button
-                onClick={() => setMode("diy")}
-                className={`rounded-full px-5 py-2 text-sm font-semibold transition ${mode === "diy" ? "btn-brand text-white" : "text-mist hover:text-ink"}`}
-              >
-                Do-It-Yourself
-              </button>
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 rounded-full bg-cyan/10 px-4 py-1.5 text-xs font-semibold text-cyan">
+              <Wrench size={13} /> Do-It-Yourself · the self-serve extension of qempireai.com
             </div>
+            <h2 className="mt-4 font-display text-3xl font-bold sm:text-4xl">Drive Q-Bot yourself — for 30% less.</h2>
+            <p className="mx-auto mt-3 max-w-xl text-mist">
+              Same agent workspace, same connectors, you're at the wheel. Every plan is priced
+              <span className="text-cyan"> 30% below the leading AI-agent tool.</span>
+            </p>
           </div>
 
-          {mode === "diy" && (
-            <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-sm text-cyan">
-              <ShieldCheck size={15} /> Every self-serve plan is priced below the big-name AI-agent tools.
-            </p>
-          )}
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {DIY_PLANS.map((p) => (
+              <div key={p.id} className={`relative flex flex-col rounded-2xl p-6 ${p.popular ? "glass-strong glow-cyan" : "glass"}`}>
+                {p.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full btn-gold px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
+                    Most Popular
+                  </div>
+                )}
+                <h3 className="font-display text-lg font-bold">{p.name}</h3>
+                <p className="mt-1 text-xs text-mist">{p.tagline}</p>
+                <div className="mt-4 flex items-end gap-1.5">
+                  <span className="font-display text-3xl font-bold text-gradient-gold">{p.price}</span>
+                  <span className="pb-1 text-xs text-mist">{p.period}</span>
+                  {p.wasPrice && <span className="pb-1 text-xs text-mist/60 line-through">{p.wasPrice}</span>}
+                </div>
+                <div className="mt-1.5 inline-flex w-fit items-center gap-1 rounded-full bg-cyan/10 px-2 py-0.5 text-[11px] text-cyan">
+                  {p.save}
+                </div>
+                <div className="mt-2 text-xs text-mist">{p.credits}</div>
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-ink/90">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <Check size={15} className="mt-0.5 shrink-0 text-cyan" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <button onClick={() => navigate("/command")} className={`mt-6 w-full rounded-xl py-2.5 text-sm font-semibold ${p.popular ? "btn-brand text-white" : "glass text-ink hover:border-white/25"}`}>
+                  {p.price === "$0" ? "Start free" : `Choose ${p.name}`}
+                </button>
+              </div>
+            ))}
+          </div>
 
-          {mode === "dfy" ? (
-            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-              {PACKAGES.map((p) => (
-                <div key={p.id} className={`relative flex flex-col rounded-2xl p-6 ${p.popular ? "glass-strong glow-purple" : "glass"}`}>
-                  {p.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full btn-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                      Most Popular
-                    </div>
-                  )}
-                  <h3 className="font-display text-lg font-bold">{p.name}</h3>
-                  <p className="mt-1 text-xs text-mist">{p.tagline}</p>
-                  <div className="mt-4 font-display text-3xl font-bold text-gradient-gold">{p.price}</div>
-                  <div className="text-xs text-mist">{p.billing}</div>
-                  <ul className="mt-4 flex-1 space-y-2 text-sm text-ink/90">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2">
-                        <Check size={15} className="mt-0.5 shrink-0 text-cyan" /> {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <button onClick={() => navigate(`/checkout/${p.id}`)} className="mt-6 w-full rounded-xl btn-brand py-2.5 text-sm font-semibold text-white">
-                    Choose {p.name.split(" ")[0]}
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {DIY_PLANS.map((p) => (
-                <div key={p.id} className={`relative flex flex-col rounded-2xl p-6 ${p.popular ? "glass-strong glow-cyan" : "glass"}`}>
-                  {p.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full btn-gold px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
-                      Best Value
-                    </div>
-                  )}
-                  <h3 className="font-display text-lg font-bold">{p.name}</h3>
-                  <p className="mt-1 text-xs text-mist">{p.tagline}</p>
-                  <div className="mt-4 flex items-end gap-1">
-                    <span className="font-display text-3xl font-bold text-gradient-gold">{p.price}</span>
-                    <span className="pb-1 text-xs text-mist">{p.period}</span>
-                  </div>
-                  <div className="mt-1 inline-flex w-fit items-center gap-1 rounded-full bg-cyan/10 px-2 py-0.5 text-[11px] text-cyan">
-                    {p.save}
-                  </div>
-                  <div className="mt-2 text-xs text-mist">{p.credits}</div>
-                  <ul className="mt-4 flex-1 space-y-2 text-sm text-ink/90">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2">
-                        <Check size={15} className="mt-0.5 shrink-0 text-cyan" /> {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <button onClick={() => navigate("/command")} className="mt-6 w-full rounded-xl btn-brand py-2.5 text-sm font-semibold text-white">
-                    Start with {p.name}
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+          <p className="mt-8 flex flex-wrap items-center justify-center gap-1.5 text-center text-sm text-mist">
+            <ShieldCheck size={15} className="text-cyan" /> Want the swarm to build it all for you instead?
+            <a href={QEMPIRE_SITE} target="_blank" rel="noreferrer" className="font-semibold text-cyan hover:underline">
+              See done-for-you at qempireai.com →
+            </a>
+          </p>
         </div>
       </section>
 

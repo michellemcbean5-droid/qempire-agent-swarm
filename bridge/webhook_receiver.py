@@ -7,12 +7,13 @@ import uuid
 import time
 import os
 import sys
+import threading
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from core.config import BRIDGE_PATH
+from core.config import BRIDGE_PATH, MAX_RETRIES
 
 app = FastAPI(
     title="Q-Empire Agent Swarm API",
@@ -147,6 +148,138 @@ async def receive_onboarding(request: Request):
         "tasks_created": created_tasks,
         "message": f"Michelle & Q-Bot are now building your empire! {len(created_tasks)} tasks queued.",
     }
+
+
+# ---------------------------------------------------------------------------
+# Interactive Idea Builder — real, Claude-generated pitch
+# ---------------------------------------------------------------------------
+
+IDEA_PROMPT = """You are Q-Bot, the AI automation companion of Q-Empire, guided by \
+Michelle the Mermaid Queen of the Deep. Q-Empire helps parents and single parents go \
+from an idea to profit (target $10,000-$50,000/month) by building and automating a real \
+business for them.
+
+A prospective founder gave you this:
+- Idea / situation: {idea}
+- Their strength: {passion}
+- Time available per week: {hours}
+- Monthly income goal: ${goal}
+- Startup budget: {budget}
+
+Design a concrete, realistic business for THIS person. Return ONLY valid JSON (no markdown) \
+with exactly these keys:
+{{
+  "name": "a memorable brand name",
+  "tagline": "one punchy sentence",
+  "model": "how it makes money",
+  "audience": "who it serves",
+  "offer": "the core paid offer",
+  "channels": ["3 marketing channels"],
+  "automations": ["4 automations that will run it"],
+  "monthlyLow": <int, realistic low near ~60% of their goal>,
+  "monthlyHigh": <int, realistic high near ~110% of their goal>,
+  "plan": [
+    {{"day": "Days 1-7", "text": "..."}},
+    {{"day": "Days 8-21", "text": "..."}},
+    {{"day": "Days 22-45", "text": "..."}},
+    {{"day": "Days 46-90", "text": "..."}}
+  ]
+}}
+Keep it grounded, encouraging, and specific to a busy parent. Reference their strength."""
+
+
+@app.post("/idea")
+async def build_idea(request: Request):
+    """Generate a real business pitch from the Idea Builder answers using Claude."""
+    from core.llm import complete_json, LLMUnavailable
+
+    data = await request.json()
+    prompt = IDEA_PROMPT.format(
+        idea=data.get("idea", "(not specified)"),
+        passion=data.get("passion", "(not specified)"),
+        hours=data.get("hours", "(not specified)"),
+        goal=data.get("goal", 25000),
+        budget=data.get("budget", "(not specified)"),
+    )
+
+    try:
+        pitch = complete_json(prompt)
+    except LLMUnavailable as exc:
+        raise HTTPException(status_code=503, detail=f"Q-Bot's engine is offline: {exc}")
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Could not generate a pitch: {exc}")
+
+    return {"status": "success", "pitch": pitch}
+
+
+# ---------------------------------------------------------------------------
+# Real build runs — stream the live agent event_stream to the frontend
+# ---------------------------------------------------------------------------
+
+# In-memory registry of active/finished builds: build_id -> state dict
+BUILDS: dict[str, dict] = {}
+BUILDS_LOCK = threading.Lock()
+
+
+def _run_build(build_id: str, task: dict) -> None:
+    """Run the agent swarm for one task, capturing live events into BUILDS."""
+    from core.agent_loop import agent_graph
+
+    initial_state = {
+        "task_id": task["id"],
+        "task_type": task["type"],
+        "payload": task.get("payload", {}),
+        "plan": [],
+        "current_step": 0,
+        "event_stream": [f"[MICHELLE] Task received: {task['id']} ({task['type']})"],
+        "final_result": None,
+        "error_count": 0,
+        "max_errors": MAX_RETRIES,
+    }
+
+    try:
+        # stream() yields state after each node so we can surface live progress
+        last_state = initial_state
+        for chunk in agent_graph.stream(initial_state):
+            for node_state in chunk.values():
+                last_state = node_state
+                with BUILDS_LOCK:
+                    BUILDS[build_id]["events"] = list(node_state.get("event_stream", []))
+                    BUILDS[build_id]["plan"] = node_state.get("plan", [])
+        with BUILDS_LOCK:
+            BUILDS[build_id]["status"] = "completed"
+            BUILDS[build_id]["result"] = last_state.get("final_result")
+    except Exception as exc:
+        with BUILDS_LOCK:
+            BUILDS[build_id]["status"] = "failed"
+            BUILDS[build_id]["events"].append(f"[ENGINE] Build failed: {exc}")
+
+
+@app.post("/build")
+async def start_build(request: Request):
+    """Kick off a real build and return a build_id the frontend can poll."""
+    data = await request.json()
+    build_id = f"build_{uuid.uuid4().hex[:8]}"
+    task = {
+        "id": build_id,
+        "type": data.get("type", "BUILD_BLUEPRINT"),
+        "payload": data.get("payload", data),
+    }
+    with BUILDS_LOCK:
+        BUILDS[build_id] = {"status": "running", "events": [], "plan": [], "result": None}
+
+    threading.Thread(target=_run_build, args=(build_id, task), daemon=True).start()
+    return {"status": "running", "build_id": build_id}
+
+
+@app.get("/build/{build_id}")
+async def get_build(build_id: str):
+    """Return the live status, events, plan and deliverables for a build."""
+    with BUILDS_LOCK:
+        state = BUILDS.get(build_id)
+        if not state:
+            raise HTTPException(status_code=404, detail=f"Build {build_id} not found")
+        return {"build_id": build_id, **{k: v for k, v in state.items()}}
 
 
 if __name__ == "__main__":

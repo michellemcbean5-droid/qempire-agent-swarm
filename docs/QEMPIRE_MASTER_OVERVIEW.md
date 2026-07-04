@@ -51,13 +51,15 @@ Add-ons: **Fund First** (small deposit, balance due 14 days after funding) · **
 ### 2. Do-It-Yourself (drive Q-Bot yourself)
 
 For clients who'd rather build their own automations. Same Q-Bot workspace, simple monthly
-plan, **priced below the big-name AI-agent tools.**
+plan. This app is the **self-serve extension of qempireai.com**. Pricing mirrors the leading
+AI-agent tool's structure at **30% cheaper** across every tier.
 
-| Plan | Price | For |
-|---|---|---|
-| Deckhand | $0 / forever | Kicking the tires · 1 automation |
-| Navigator | $29 / mo | Building your own automations · up to 10 |
-| Captain | $179 / mo | Power users · unlimited automations |
+| Plan | Price | vs. market | For |
+|---|---|---|---|
+| Tide Pool | $0 / forever | — | Kicking the tires · 1 automation |
+| Current | $14 / mo | $20 → 30% off | Parents building on the side · up to 10 automations |
+| Reef | $28 / mo | $40 → 30% off | Deeper research, sites & slides |
+| Deep Blue | $140 / mo | $200 → save $60 | Power users · many automations at scale |
 
 ---
 

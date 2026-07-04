@@ -13,9 +13,13 @@ Guided by **Michelle** (the Mermaid Queen of the Deep) and her AI companion **Q-
 
 ### Two ways to build
 
-- **Done-For-You** — pay once, the swarm builds and automates everything (packages below).
-- **Do-It-Yourself** — drive Q-Bot yourself on a low monthly plan ($0 / $29 / $179), priced
-  below the big-name AI-agent tools.
+- **Done-For-You** — pay once, the swarm builds and automates everything (on qempireai.com).
+- **Do-It-Yourself** — drive Q-Bot yourself on a low monthly plan (**$0 / $14 / $28 / $140**),
+  mirroring the leading AI-agent tool's structure at **30% cheaper** across the board. This app
+  is the self-serve extension of qempireai.com.
+
+The Idea Builder and the "Q-Bot's Computer" workspace call the **real** backend (FastAPI +
+LangGraph + Claude) — set `ANTHROPIC_API_KEY` and run the API for live pitches and builds.
 
 ## Architecture
 

@@ -171,14 +171,15 @@ export const PACKAGES: Pkg[] = [
 ];
 
 // ---------- Do-It-Yourself (self-serve) plans ----------
-// For clients who'd rather drive Q-Bot and build their own automations.
-// Priced to stay below the big-name AI-agent tools.
+// The DIY extension of qempireai.com: drive Q-Bot and build your own automations.
+// Structure mirrors the leading AI-agent tool, priced 30% cheaper across the board.
 
 export interface DiyPlan {
   id: string;
   name: string;
   price: string;
   period: string;
+  wasPrice: string; // the equivalent full-market price we undercut
   credits: string;
   save: string; // savings badge
   tagline: string;
@@ -189,34 +190,48 @@ export interface DiyPlan {
 export const DIY_PLANS: DiyPlan[] = [
   {
     id: "diy-free",
-    name: "Deckhand",
+    name: "Tide Pool",
     price: "$0",
     period: "forever",
-    credits: "300 credits / day",
+    wasPrice: "",
+    credits: "300 daily credits + 1,000 to start",
     save: "Free forever",
-    tagline: "Kick the tires. Build a small automation yourself.",
-    features: ["Q-Bot workspace access", "1 active automation", "Community templates", "Standard queue"],
+    tagline: "Test-drive Q-Bot. Build a workflow or two.",
+    features: ["Full Q-Bot workspace", "300 refreshing credits/day", "Community templates", "1 active automation"],
   },
   {
-    id: "diy-starter",
-    name: "Navigator",
-    price: "$29",
-    period: "/month",
+    id: "diy-standard",
+    name: "Current",
+    price: "$14",
+    period: "/mo",
+    wasPrice: "$20",
     credits: "4,000 credits / month",
-    save: "Best price in class",
-    tagline: "Build your own automations, guided by Q-Bot.",
-    features: ["Everything in Deckhand", "Up to 10 automations", "All connector templates", "Priority queue", "Lower cost than big-name AI agents"],
+    save: "30% cheaper",
+    tagline: "For parents building on the side.",
+    features: ["Everything in Tide Pool", "4,000 monthly credits", "Up to 10 automations", "All connector templates", "Agent Mode"],
     popular: true,
   },
   {
+    id: "diy-plus",
+    name: "Reef",
+    price: "$28",
+    period: "/mo",
+    wasPrice: "$40",
+    credits: "8,000 credits / month",
+    save: "30% cheaper",
+    tagline: "Deeper research, sites & slides.",
+    features: ["Everything in Current", "8,000 monthly credits", "Wide research", "Website & deck generation", "Up to 20 concurrent tasks"],
+  },
+  {
     id: "diy-pro",
-    name: "Captain",
-    price: "$179",
-    period: "/month",
-    credits: "22,000 credits / month",
-    save: "Undercuts the big agents",
-    tagline: "Power users running many automations solo.",
-    features: ["Everything in Navigator", "Unlimited automations", "Parallel agent runs", "Custom connectors", "Priced below rival AI-agent tools"],
+    name: "Deep Blue",
+    price: "$140",
+    period: "/mo",
+    wasPrice: "$200",
+    credits: "40,000 credits / month",
+    save: "Save $60/mo",
+    tagline: "Run many automations at scale.",
+    features: ["Everything in Reef", "40,000 monthly credits", "Sustained large-scale research", "Batch generation", "Priority everything"],
   },
 ];
 
