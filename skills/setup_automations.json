@@ -1,0 +1,34 @@
+{
+  "skill_name": "setup_automations",
+  "description": "Configure and deploy AI automations for the client",
+  "trigger_task_type": "SETUP_AUTOMATIONS",
+  "steps": [
+    {
+      "step": 1,
+      "action": "generate_content",
+      "params_template": {
+        "prompt": "Create a detailed automation setup guide for a {industry} business called {business_name}. They selected these automations: {automations_selected}. For each automation, provide: 1) What it does, 2) How to set it up using free tools (Google Sheets, Apps Script, Calendly free, Tawk.to), 3) The webhook URL format, 4) Testing instructions. Format as a clear step-by-step guide."
+      },
+      "description": "Generate automation setup documentation"
+    },
+    {
+      "step": 2,
+      "action": "file_write",
+      "params_template": {
+        "path": "/home/ubuntu/output/documents/{business_name}/automations_guide.md",
+        "content": "# Automation Setup Guide\n\nGenerated for {business_name}\n\nSee the full guide in your Client Portal."
+      },
+      "description": "Save automation guide to output directory"
+    },
+    {
+      "step": 3,
+      "action": "send_email",
+      "params_template": {
+        "to": "{client_email}",
+        "subject": "Your AI Automations Are Configured! 🤖",
+        "body": "Your automations are set up and ready to run 24/7. Check your Client Portal for the setup guide and webhook URLs."
+      },
+      "description": "Notify client that automations are active"
+    }
+  ]
+}

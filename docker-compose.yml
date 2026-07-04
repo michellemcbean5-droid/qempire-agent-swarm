@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  agent:
+    build: .
+    container_name: qempire-agent
+    env_file: .env
+    volumes:
+      - ./memory:/app/memory
+      - ./output:/home/ubuntu/output
+    restart: unless-stopped
+    networks:
+      - agent-network
+
+  webhook:
+    build: .
+    container_name: qempire-webhook
+    command: ["python3", "bridge/webhook_receiver.py"]
+    env_file: .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./memory:/app/memory
+    restart: unless-stopped
+    networks:
+      - agent-network
+
+networks:
+  agent-network:
+    driver: bridge

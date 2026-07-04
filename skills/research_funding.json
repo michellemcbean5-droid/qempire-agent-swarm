@@ -1,0 +1,47 @@
+{
+  "skill_name": "research_funding",
+  "description": "Research grants, loans, and investor opportunities for the client",
+  "trigger_task_type": "RESEARCH_FUNDING",
+  "steps": [
+    {
+      "step": 1,
+      "action": "browser_search",
+      "params_template": {
+        "query": "small business grants {industry} 2026 applications open"
+      },
+      "description": "Research available grants for this industry"
+    },
+    {
+      "step": 2,
+      "action": "browser_search",
+      "params_template": {
+        "query": "SBA loans small business {industry} requirements 2026"
+      },
+      "description": "Research SBA loan options"
+    },
+    {
+      "step": 3,
+      "action": "generate_document",
+      "params_template": {
+        "doc_type": "funding_strategy",
+        "data": {
+          "business_name": "{business_name}",
+          "industry": "{industry}",
+          "funding_amount": "{funding_amount}",
+          "funding_types": "{funding_types}"
+        }
+      },
+      "description": "Generate comprehensive funding strategy document"
+    },
+    {
+      "step": 4,
+      "action": "send_email",
+      "params_template": {
+        "to": "{client_email}",
+        "subject": "Your Funding Roadmap is Ready! 💰",
+        "body": "We've identified grants, loans, and investor opportunities for your business. Check your Client Portal for the full funding strategy with application deadlines."
+      },
+      "description": "Notify client that funding strategy is ready"
+    }
+  ]
+}

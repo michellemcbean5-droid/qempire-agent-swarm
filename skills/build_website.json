@@ -1,0 +1,40 @@
+{
+  "skill_name": "build_website",
+  "description": "Generate and deploy a professional website for a client",
+  "trigger_task_type": "BUILD_WEBSITE",
+  "steps": [
+    {
+      "step": 1,
+      "action": "generate_website",
+      "params_template": {
+        "business_name": "{business_name}",
+        "industry": "{industry}",
+        "pages": "{pages}",
+        "brand_tone": "{brand_tone}",
+        "colors": "{colors}",
+        "target_audience": "{target_audience}",
+        "elevator_pitch": "{elevator_pitch}"
+      },
+      "description": "Generate complete website with HTML, CSS, and copy"
+    },
+    {
+      "step": 2,
+      "action": "deploy_to_github",
+      "params_template": {
+        "repo_name": "{business_name}-website",
+        "folder": "/home/ubuntu/output/websites/{business_name}"
+      },
+      "description": "Deploy website to GitHub Pages for free hosting"
+    },
+    {
+      "step": 3,
+      "action": "send_email",
+      "params_template": {
+        "to": "{client_email}",
+        "subject": "Your Website is LIVE! 🚀",
+        "body": "Great news! Your professional website has been generated and deployed. Visit your Client Portal to see it live and request any changes."
+      },
+      "description": "Notify client that website is live"
+    }
+  ]
+}

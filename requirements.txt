@@ -1,0 +1,16 @@
+langchain>=0.3.0
+langgraph>=0.2.0
+langchain-anthropic>=0.3.0
+langchain-community>=0.3.0
+playwright>=1.40.0
+duckduckgo-search>=6.0.0
+fpdf2>=2.7.0
+python-pptx>=0.6.21
+google-auth>=2.0.0
+google-api-python-client>=2.0.0
+gspread>=6.0.0
+gitpython>=3.1.0
+fastapi>=0.100.0
+uvicorn>=0.20.0
+python-dotenv>=1.0.0
+httpx>=0.25.0

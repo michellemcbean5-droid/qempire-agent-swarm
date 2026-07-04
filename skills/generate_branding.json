@@ -1,0 +1,31 @@
+{
+  "skill_name": "generate_branding",
+  "description": "Generate a complete brand identity kit",
+  "trigger_task_type": "GENERATE_BRANDING",
+  "steps": [
+    {
+      "step": 1,
+      "action": "generate_document",
+      "params_template": {
+        "doc_type": "branding_kit",
+        "data": {
+          "business_name": "{business_name}",
+          "industry": "{industry}",
+          "brand_tone": "{brand_tone}",
+          "colors": "{colors}"
+        }
+      },
+      "description": "Generate comprehensive brand identity guide"
+    },
+    {
+      "step": 2,
+      "action": "send_email",
+      "params_template": {
+        "to": "{client_email}",
+        "subject": "Your Brand Identity Kit is Ready! 🎨",
+        "body": "Your complete brand guide is ready — including color palette, typography, voice guidelines, and tagline options. View it in your Client Portal."
+      },
+      "description": "Notify client that branding kit is complete"
+    }
+  ]
+}
