@@ -21,11 +21,11 @@ def _format_error_message(error: Exception, max_length: int = 100) -> str:
     error_msg = str(error)
     formatted = f"{error_type}: {error_msg}"
     if len(formatted) > max_length:
-        # Truncate to max_length, but ensure we keep the exception type
+        # Truncate to max_length, but try to preserve word boundaries
         truncated = formatted[:max_length]
-        if not truncated.endswith("..."):
-            truncated = truncated.rsplit(" ", 1)[0] + "..."
-        return truncated
+        if " " in truncated:
+            truncated = truncated.rsplit(" ", 1)[0]
+        return truncated + "..."
     return formatted
 
 
@@ -340,16 +340,21 @@ Make it practical, achievable, and inspiring."""
             pdf.ln(5)
 
             for line in content.split("\n"):
-                if line.startswith("#"):
+                # Remove emojis and special Unicode characters for PDF compatibility
+                # FPDF with Helvetica font doesn't support extended Unicode
+                safe_line = line.encode("ascii", "ignore").decode("ascii")
+                
+                if safe_line.startswith("#"):
                     pdf.set_font("Helvetica", "B", 14)
-                    pdf.cell(0, 8, line.replace("#", "").strip(), ln=True)
+                    pdf.cell(0, 8, safe_line.replace("#", "").strip(), ln=True)
                     pdf.set_font("Helvetica", "", 11)
-                elif line.startswith("**") and line.endswith("**"):
+                elif safe_line.startswith("**") and safe_line.endswith("**"):
                     pdf.set_font("Helvetica", "B", 12)
-                    pdf.cell(0, 7, line.replace("**", "").strip(), ln=True)
+                    pdf.cell(0, 7, safe_line.replace("**", "").strip(), ln=True)
                     pdf.set_font("Helvetica", "", 11)
                 else:
-                    pdf.multi_cell(0, 6, line)
+                    if safe_line:  # Only add non-empty lines
+                        pdf.multi_cell(0, 6, safe_line)
 
             pdf_path = f"{output_dir}/roadmap.pdf"
             pdf.output(pdf_path)
