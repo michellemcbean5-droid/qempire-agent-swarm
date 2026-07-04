@@ -66,7 +66,7 @@ export default function Onboard() {
     const defaults = AUTOMATION_MODULES.slice(0, pkg.maxAutomations).map((a) => a.id);
     setFormData((prev) => ({
       ...prev,
-      automations_selected: defaults.slice(0, pkg.maxAutomations),
+      automations_selected: defaults,
     }));
   }, [pkg]);
 
@@ -143,7 +143,7 @@ export default function Onboard() {
       toast.success("Q-Bot is building your empire!");
       setTimeout(() => navigate("/client-portal"), 2000);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Submission failed";
+      const message = error instanceof Error ? error.message : "Failed to submit onboarding form. Please check your connection and try again.";
       toast.error(message);
       setLoading(false);
     }

@@ -12,6 +12,8 @@ interface AIChatAssistantProps {
 }
 
 export default function AIChatAssistant({ context = "general" }: AIChatAssistantProps) {
+  // context prop retained for future use (e.g., routing to different AI prompts)
+  void context;
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Hi! I'm Q-Bot. How can I help you build your empire today?" }
@@ -32,14 +34,28 @@ export default function AIChatAssistant({ context = "general" }: AIChatAssistant
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setInput("");
 
-    // Simulated Q-Bot response based on context
+    // Simulated Q-Bot response with basic keyword matching
     setTimeout(() => {
-      const responses: Record<string, string> = {
-        general: "I can help you choose a plan, walk you through onboarding, or explain how Q-Empire builds your business.",
-        onboarding: "Take your time with each step. The more details you provide, the better Q-Bot can tailor your business buildout.",
-        portal: "Your dashboard updates in real-time as Q-Bot completes each deliverable. You can download assets from each tab.",
-      };
-      setMessages((prev) => [...prev, { role: "assistant", content: responses[context] || responses.general }]);
+      const lowerInput = userMessage.toLowerCase();
+      let response = "I can help you choose a plan, walk you through onboarding, or explain how Q-Empire builds your business.";
+
+      if (lowerInput.includes("price") || lowerInput.includes("cost") || lowerInput.includes("plan")) {
+        response = "We offer Starter ($49/mo), Foundation ($199/mo), Empire Pro ($499/mo), and Enterprise ($1,997/mo). Each tier includes more automations, pages, and features.";
+      } else if (lowerInput.includes("onboard") || lowerInput.includes("wizard") || lowerInput.includes("form")) {
+        response = "The onboarding wizard collects your business details, brand preferences, website pages, automations, and funding goals. It takes about 5 minutes.";
+      } else if (lowerInput.includes("portal") || lowerInput.includes("dashboard") || lowerInput.includes("progress")) {
+        response = "Your client portal shows real-time progress on your business blueprint, website, automations, and funding strategy.";
+      } else if (lowerInput.includes("automation") || lowerInput.includes("bot")) {
+        response = "Q-Bot can set up lead capture chatbots, email sequences, CRM pipelines, scheduling, invoicing, payment reminders, reporting, social posting, and client onboarding flows.";
+      } else if (lowerInput.includes("website") || lowerInput.includes("site")) {
+        response = "We generate a professional React website based on your brand, pages, and content. It deploys to GitHub Pages and is mobile-responsive.";
+      } else if (lowerInput.includes("fund") || lowerInput.includes("grant") || lowerInput.includes("loan")) {
+        response = "Our funding strategy identifies grants, loans, and investor opportunities matched to your industry and funding goals.";
+      } else if (lowerInput.includes("hello") || lowerInput.includes("hi") || lowerInput.includes("hey")) {
+        response = "Hello! I'm Q-Bot. How can I help you build your empire today?";
+      }
+
+      setMessages((prev) => [...prev, { role: "assistant", content: response }]);
     }, 800);
   };
 
