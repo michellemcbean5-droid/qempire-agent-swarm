@@ -46,25 +46,32 @@ TASK_TYPES = [
     "FULL_ENTERPRISE",
 ]
 
-# Package Definitions
+# Package Definitions — subscription tiers aligned with the Q-Empire blueprint
 PACKAGES = {
+    "starter": {
+        "name": "Starter",
+        "price": 49,
+        "tasks": ["BUILD_BLUEPRINT", "SETUP_AUTOMATIONS"],
+        "max_automations": 1,
+        "max_pages": 1,
+    },
     "foundation": {
-        "name": "Foundation Launchpad",
-        "price": 1997,
+        "name": "Foundation",
+        "price": 199,
         "tasks": ["BUILD_BLUEPRINT", "BUILD_WEBSITE", "SETUP_AUTOMATIONS", "RESEARCH_FUNDING"],
         "max_automations": 3,
         "max_pages": 3,
     },
     "empire-pro": {
-        "name": "Empire Builder Pro",
-        "price": 4997,
+        "name": "Empire Pro",
+        "price": 499,
         "tasks": ["BUILD_BLUEPRINT", "BUILD_WEBSITE", "SETUP_AUTOMATIONS", "RESEARCH_FUNDING", "GENERATE_BRANDING"],
         "max_automations": 10,
         "max_pages": 7,
     },
     "enterprise": {
         "name": "Enterprise AI",
-        "price": 15000,
+        "price": 1997,
         "tasks": ["BUILD_BLUEPRINT", "BUILD_WEBSITE", "SETUP_AUTOMATIONS"],
         "max_automations": 999,
         "max_pages": 999,

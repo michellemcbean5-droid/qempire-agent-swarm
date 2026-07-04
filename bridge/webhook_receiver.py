@@ -104,29 +104,55 @@ async def list_tasks():
     }
 
 
+@app.get("/packages")
+async def list_packages():
+    """Return available subscription tiers aligned with the Q-Empire blueprint."""
+    from core.config import PACKAGES
+
+    return {
+        "status": "success",
+        "packages": [
+            {
+                "id": pkg_id,
+                "name": config["name"],
+                "price": config["price"],
+                "billing": "month",
+                "max_automations": config["max_automations"],
+                "max_pages": config["max_pages"],
+                "tasks": config["tasks"],
+            }
+            for pkg_id, config in PACKAGES.items()
+        ],
+    }
+
+
 @app.post("/onboard")
 async def receive_onboarding(request: Request):
     """
     Receive onboarding data from the React wizard and create all required tasks.
     This is the main integration point with the frontend.
     """
+    from core.config import PACKAGES
+
     data = await request.json()
     package_id = data.get("package_id", "foundation")
     client_email = data.get("email", "")
 
-    # Map package to task types
-    package_tasks = {
-        "foundation": ["BUILD_BLUEPRINT", "BUILD_WEBSITE", "SETUP_AUTOMATIONS", "RESEARCH_FUNDING"],
-        "empire-pro": ["BUILD_BLUEPRINT", "BUILD_WEBSITE", "SETUP_AUTOMATIONS", "RESEARCH_FUNDING", "GENERATE_BRANDING"],
-        "enterprise": ["BUILD_BLUEPRINT", "BUILD_WEBSITE", "SETUP_AUTOMATIONS"],
-        "payg": data.get("selected_modules", []),
-    }
+    # Validate package ID
+    if package_id not in PACKAGES:
+        raise HTTPException(status_code=400, detail=f"Invalid package_id: {package_id}")
 
-    tasks_to_create = package_tasks.get(package_id, ["BUILD_BLUEPRINT"])
+    package_config = PACKAGES[package_id]
+
+    # Map package to task types using centralized config
+    task_types = list(package_config["tasks"])
+    if package_id == "payg":
+        task_types = data.get("selected_modules", [])
+
     bridge = load_bridge()
     created_tasks = []
 
-    for task_type in tasks_to_create:
+    for task_type in task_types:
         task = {
             "id": f"task_{uuid.uuid4().hex[:8]}",
             "type": task_type,
@@ -146,6 +172,29 @@ async def receive_onboarding(request: Request):
         "package": package_id,
         "tasks_created": created_tasks,
         "message": f"Q-Bot is now building your empire! {len(created_tasks)} tasks queued.",
+    }
+
+
+@app.get("/status/{email}")
+async def get_client_status(email: str):
+    """Return build status for a client email (placeholder for CRM integration)."""
+    bridge = load_bridge()
+    client_tasks = [
+        task for queue in ["pending", "needs_clarification", "completed"]
+        for task in bridge.get(queue, [])
+        if task.get("payload", {}).get("client_email") == email
+    ]
+
+    completed = sum(1 for t in client_tasks if t.get("status") == "completed")
+    total = max(len(client_tasks), 1)
+
+    return {
+        "status": "success",
+        "email": email,
+        "progress": round((completed / total) * 100),
+        "tasks_total": len(client_tasks),
+        "tasks_completed": completed,
+        "tasks": [{"id": t["id"], "type": t["type"], "status": t["status"]} for t in client_tasks[-10:]],
     }
 
 

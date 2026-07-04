@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #0A0A1A;
+  --color-bg-secondary: #1a1a2e;
+  --color-bg-sidebar: #0a0a0f;
+  --color-accent-cyan: #00FFFF;
+  --color-accent-purple: #BF00FF;
+  --color-accent-pink: #FF007F;
+  --color-accent-blue: #4169E1;
+  --color-accent-gold: #D4AF37;
+  --color-success: #00C853;
+  --font-display: "Playfair Display", serif;
+  --font-heading: "Montserrat", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0A0A1A;
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: "Playfair Display", serif;
+}
+
+.font-heading {
+  font-family: "Montserrat", sans-serif;
+}
+
+.font-body {
+  font-family: "Inter", sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0A1A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4169E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #BF00FF;
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(to right, #00FFFF, #FF007F);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass card */
+.glass-card {
+  background: rgba(26, 26, 46, 0.5);
+  border: 1px solid rgba(65, 105, 225, 0.2);
+  backdrop-filter: blur(10px);
+}
