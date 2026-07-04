@@ -17,11 +17,30 @@ KIMI_BASE_URL = os.getenv("KIMI_BASE_URL", "https://api.moonshot.ai/v1")
 KIMI_MODEL = os.getenv("KIMI_MODEL", "kimi-k2.5")
 
 # ---- Credit economics (see docs/PRICING_ECONOMICS.md) ----
-# 1 credit meters this many blended Kimi tokens. Charging ceil(tokens / TOKENS_PER_CREDIT)
-# credits per run keeps every task at/above the target markup by construction.
-TOKENS_PER_CREDIT = int(os.getenv("TOKENS_PER_CREDIT", "1700"))
+# Output tokens cost ~4.2x input on Kimi, so we meter "effective tokens"
+# (= input + output * OUTPUT_WEIGHT) and charge ceil(effective / TOKENS_PER_CREDIT)
+# credits per run. This holds the target markup for ANY input/output mix.
+TOKENS_PER_CREDIT = int(os.getenv("TOKENS_PER_CREDIT", "4000"))   # effective tokens per credit
+OUTPUT_WEIGHT = float(os.getenv("OUTPUT_WEIGHT", "4.2"))          # output token cost / input token cost
 CREDIT_SELL_USD = float(os.getenv("CREDIT_SELL_USD", "0.0035"))   # our price per credit (30% below Manus $0.005)
-TARGET_MARKUP = float(os.getenv("TARGET_MARKUP", "0.45"))         # 45% markup goal
+TARGET_MARKUP = float(os.getenv("TARGET_MARKUP", "0.45"))         # 45% markup floor
+
+# Stripe billing (real subscriptions + credit top-ups)
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+# Map our plan ids to Stripe Price ids (create these in your Stripe dashboard).
+STRIPE_PRICES = {
+    "diy-standard": os.getenv("STRIPE_PRICE_CURRENT", ""),    # $14/mo · 4,000 credits
+    "diy-plus": os.getenv("STRIPE_PRICE_REEF", ""),           # $28/mo · 8,000 credits
+    "diy-pro": os.getenv("STRIPE_PRICE_DEEP_BLUE", ""),       # $140/mo · 40,000 credits
+}
+# Credits granted per plan on successful subscription.
+PLAN_CREDITS = {"diy-standard": 4000, "diy-plus": 8000, "diy-pro": 40000}
+# One-off credit top-up packs: pack id -> (Stripe price id, credits granted).
+STRIPE_CREDIT_PACKS = {
+    "pack-5k": (os.getenv("STRIPE_PRICE_PACK_5K", ""), 5000),
+    "pack-20k": (os.getenv("STRIPE_PRICE_PACK_20K", ""), 20000),
+}
 
 # GitHub Configuration
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")

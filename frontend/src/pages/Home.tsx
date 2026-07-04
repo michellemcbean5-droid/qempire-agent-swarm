@@ -274,7 +274,7 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <button onClick={() => navigate("/command")} className={`mt-6 w-full rounded-xl py-2.5 text-sm font-semibold ${p.popular ? "btn-brand text-white" : "glass text-ink hover:border-white/25"}`}>
+                <button onClick={() => navigate(p.price === "$0" ? "/command" : "/account")} className={`mt-6 w-full rounded-xl py-2.5 text-sm font-semibold ${p.popular ? "btn-brand text-white" : "glass text-ink hover:border-white/25"}`}>
                   {p.price === "$0" ? "Start free" : `Choose ${p.name}`}
                 </button>
               </div>

@@ -65,3 +65,45 @@ export async function getBuild(buildId: string): Promise<BuildState> {
   if (!res.ok) throw new Error(`Build not found (${res.status})`);
   return (await res.json()) as BuildState;
 }
+
+// ---- Billing (Stripe) ----
+
+/** Start Stripe Checkout; returns the URL to redirect the customer to. */
+export async function createCheckout(
+  kind: "subscription" | "credits",
+  itemId: string,
+  email: string
+): Promise<string> {
+  const res = await fetch(`${API_BASE}/billing/checkout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      kind,
+      item_id: itemId,
+      email,
+      success_url: `${window.location.origin}/account?checkout=success`,
+      cancel_url: `${window.location.origin}/account?checkout=cancel`,
+    }),
+  });
+  if (!res.ok) {
+    let detail = `Checkout failed (${res.status})`;
+    try {
+      detail = (await res.json()).detail || detail;
+    } catch {
+      /* ignore */
+    }
+    throw new Error(detail);
+  }
+  return (await res.json()).url as string;
+}
+
+export interface Entitlement {
+  plan: string | null;
+  credits: number;
+}
+
+export async function getBillingStatus(email: string): Promise<Entitlement> {
+  const res = await fetch(`${API_BASE}/billing/status?email=${encodeURIComponent(email)}`);
+  if (!res.ok) throw new Error(`Status failed (${res.status})`);
+  return (await res.json()) as Entitlement;
+}

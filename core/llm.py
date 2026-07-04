@@ -8,7 +8,7 @@ import json
 import math
 from core.config import (
     LLM_MODEL, ANTHROPIC_API_KEY, LLM_MAX_TOKENS,
-    KIMI_API_KEY, KIMI_BASE_URL, KIMI_MODEL, TOKENS_PER_CREDIT,
+    KIMI_API_KEY, KIMI_BASE_URL, KIMI_MODEL, TOKENS_PER_CREDIT, OUTPUT_WEIGHT,
 )
 
 
@@ -16,8 +16,8 @@ class LLMUnavailable(RuntimeError):
     """Raised when no provider key is configured or the API call fails."""
 
 
-def _kimi(prompt: str, max_tokens: int, temperature: float, api_key: str) -> tuple[str, int]:
-    """Call Kimi/Moonshot (OpenAI-compatible). Returns (text, total_tokens)."""
+def _kimi(prompt: str, max_tokens: int, temperature: float, api_key: str) -> tuple[str, int, int]:
+    """Call Kimi/Moonshot (OpenAI-compatible). Returns (text, input_tokens, output_tokens)."""
     import httpx
 
     resp = httpx.post(
@@ -35,11 +35,10 @@ def _kimi(prompt: str, max_tokens: int, temperature: float, api_key: str) -> tup
     data = resp.json()
     text = data["choices"][0]["message"]["content"]
     usage = data.get("usage", {})
-    total = int(usage.get("total_tokens") or 0)
-    return text, total
+    return text, int(usage.get("prompt_tokens") or 0), int(usage.get("completion_tokens") or 0)
 
 
-def _anthropic(prompt: str, max_tokens: int, temperature: float, api_key: str) -> tuple[str, int]:
+def _anthropic(prompt: str, max_tokens: int, temperature: float, api_key: str) -> tuple[str, int, int]:
     import httpx
 
     resp = httpx.post(
@@ -57,20 +56,25 @@ def _anthropic(prompt: str, max_tokens: int, temperature: float, api_key: str) -
     data = resp.json()
     text = data["content"][0]["text"]
     usage = data.get("usage", {})
-    total = int((usage.get("input_tokens") or 0) + (usage.get("output_tokens") or 0))
-    return text, total
+    return text, int(usage.get("input_tokens") or 0), int(usage.get("output_tokens") or 0)
+
+
+def credits_for(input_tokens: int, output_tokens: int) -> int:
+    """Charge on effective tokens (output weighted by its higher cost) so the
+    target markup holds regardless of the input/output mix."""
+    effective = input_tokens + output_tokens * OUTPUT_WEIGHT
+    return max(1, math.ceil(effective / TOKENS_PER_CREDIT))
 
 
 def complete_metered(prompt: str, max_tokens: int = LLM_MAX_TOKENS, temperature: float = 0.4,
                      api_key: str | None = None) -> tuple[str, int]:
-    """Return (text, credits_charged). Kimi first, then Anthropic. Credits are
-    metered from real token usage so margin holds on every call."""
+    """Return (text, credits_charged). Kimi first, then Anthropic."""
     kimi_key = api_key or KIMI_API_KEY
     try:
         if kimi_key:
-            text, tokens = _kimi(prompt, max_tokens, temperature, kimi_key)
+            text, tin, tout = _kimi(prompt, max_tokens, temperature, kimi_key)
         elif ANTHROPIC_API_KEY:
-            text, tokens = _anthropic(prompt, max_tokens, temperature, ANTHROPIC_API_KEY)
+            text, tin, tout = _anthropic(prompt, max_tokens, temperature, ANTHROPIC_API_KEY)
         else:
             raise LLMUnavailable("No model key set (KIMI_API_KEY or ANTHROPIC_API_KEY)")
     except LLMUnavailable:
@@ -78,8 +82,10 @@ def complete_metered(prompt: str, max_tokens: int = LLM_MAX_TOKENS, temperature:
     except Exception as exc:
         raise LLMUnavailable(str(exc)) from exc
 
-    credits = max(1, math.ceil((tokens or max_tokens) / TOKENS_PER_CREDIT))
-    return text, credits
+    # Fall back to a sane estimate if usage wasn't reported.
+    if tin == 0 and tout == 0:
+        tout = max_tokens
+    return text, credits_for(tin, tout)
 
 
 def complete(prompt: str, max_tokens: int = LLM_MAX_TOKENS, temperature: float = 0.4,

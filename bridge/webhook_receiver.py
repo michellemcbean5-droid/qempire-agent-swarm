@@ -282,6 +282,63 @@ async def get_build(build_id: str):
         return {"build_id": build_id, **{k: v for k, v in state.items()}}
 
 
+# ---------------------------------------------------------------------------
+# Stripe billing — real subscriptions + credit packs (pay before you build)
+# ---------------------------------------------------------------------------
+
+@app.post("/billing/checkout")
+async def billing_checkout(request: Request):
+    """Create a Stripe Checkout Session for a plan (subscription) or credit pack."""
+    from bridge import billing
+
+    data = await request.json()
+    kind = data.get("kind", "subscription")
+    item_id = data.get("item_id", "")
+    email = data.get("email", "")
+    success_url = data.get("success_url", "https://qempireai.com/account?checkout=success")
+    cancel_url = data.get("cancel_url", "https://qempireai.com/account?checkout=cancel")
+    try:
+        url = billing.create_checkout(kind, item_id, email, success_url, cancel_url)
+        return {"url": url}
+    except billing.BillingNotConfigured as exc:
+        raise HTTPException(status_code=503, detail=f"Billing not configured: {exc}")
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Checkout failed: {exc}")
+
+
+@app.get("/billing/status")
+async def billing_status(email: str = ""):
+    """Return the caller's plan + credit entitlement."""
+    from bridge import billing
+    return billing.get_entitlement(email)
+
+
+@app.post("/billing/portal")
+async def billing_portal(request: Request):
+    """Open the Stripe customer portal to manage or cancel a subscription."""
+    from bridge import billing
+    data = await request.json()
+    try:
+        url = billing.create_portal(data.get("email", ""), data.get("return_url", "https://qempireai.com/account"))
+        return {"url": url}
+    except billing.BillingNotConfigured as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+
+
+@app.post("/billing/webhook")
+async def billing_webhook(request: Request):
+    """Stripe webhook — grants plan/credits on completed checkout."""
+    from bridge import billing
+    payload = await request.body()
+    sig = request.headers.get("stripe-signature", "")
+    try:
+        return billing.handle_webhook(payload, sig)
+    except billing.BillingNotConfigured as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Webhook error: {exc}")
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("WEBHOOK_PORT", "8080"))

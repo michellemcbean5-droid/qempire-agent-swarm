@@ -9,6 +9,7 @@ const KEY = "qe_account_v1";
 
 export interface Account {
   plan: string | null;          // e.g. "diy-standard"
+  email: string;                // billing email
   apiKey: string;               // customer's own model API key (BYOK)
   version: "lite" | "standard" | "pro";
   connectors: string[];         // connected connector names
@@ -21,6 +22,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 const DEFAULT: Account = {
   plan: null,
+  email: "",
   apiKey: "",
   version: "standard",
   connectors: [],
