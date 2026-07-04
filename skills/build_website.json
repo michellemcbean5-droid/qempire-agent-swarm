@@ -32,7 +32,7 @@
       "params_template": {
         "to": "{client_email}",
         "subject": "Your Website is LIVE! 🚀",
-        "body": "Great news! Your professional website has been generated and deployed. Visit your Client Portal to see it live and request any changes."
+        "body": "Great news! Michelle and Q-Bot have generated and deployed your professional website. Visit your Client Portal to see it live and request any changes."
       },
       "description": "Notify client that website is live"
     }

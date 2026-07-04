@@ -69,12 +69,12 @@ def main() -> None:
     """Main loop — poll bridge.json at configured interval."""
     print("=" * 60)
     print("  Q-EMPIRE AGENT SWARM")
-    print("  Autonomous Business Builder")
+    print("  Michelle & Q-Bot — From Idea to Empire")
     print("=" * 60)
     print(f"  Bridge path: {BRIDGE_PATH}")
     print(f"  Poll interval: {POLL_INTERVAL}s")
     print("=" * 60)
-    print("[MONITOR] Started. Waiting for tasks...")
+    print("[MICHELLE] Started. Waiting for tasks... 🧜🏾‍♀️")
 
     while True:
         try:

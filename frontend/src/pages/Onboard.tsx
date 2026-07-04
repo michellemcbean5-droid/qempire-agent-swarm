@@ -56,7 +56,9 @@ export default function Onboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, package_id: "foundation" }),
       });
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`Onboarding request failed: ${response.status}`);
+      }
       toast.success("Q-Bot is building your empire!");
       setTimeout(() => navigate("/client-portal"), 2000);
     } catch (error) {
@@ -81,6 +83,10 @@ export default function Onboard() {
           {/* Step 1: Business Basics */}
           {step === 1 && (
             <div>
+              <div className="text-center mb-6">
+                <div className="text-4xl mb-2">🧜🏾‍♀️ 🤖</div>
+                <p className="text-white/60 text-sm">Michelle & Q-Bot will use this to build your business.</p>
+              </div>
               <h2 className="text-2xl font-bold mb-6">Tell Us About Your Business</h2>
               <div className="space-y-4">
                 <div>
@@ -174,8 +180,8 @@ export default function Onboard() {
           {/* Loading State */}
           {loading && (
             <div className="text-center py-12">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#4169E1] to-[#BF00FF] mx-auto mb-6 animate-pulse flex items-center justify-center text-3xl font-black">Q</div>
-              <h2 className="text-2xl font-bold mb-2">Q-Bot is Building Your Empire...</h2>
+              <div className="text-6xl mb-6 animate-pulse">🧜🏾‍♀️</div>
+              <h2 className="text-2xl font-bold mb-2">Michelle & Q-Bot Are Building Your Empire...</h2>
               <p className="text-white/60">This usually takes about 60-90 minutes. We'll email you when it's ready.</p>
             </div>
           )}

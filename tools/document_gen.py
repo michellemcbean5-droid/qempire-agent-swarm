@@ -40,6 +40,8 @@ Industry: {industry}
 Target Audience: {target_audience}
 Value Proposition: {elevator_pitch}
 
+Brand Voice: This business plan is being created by Q-Empire Automation, guided by Michelle (the Black Mermaid Queen of the Deep) and Q-Bot (the friendly automation agent). The tone should be empowering, clear, and welcoming to founders of color — turning complex business strategy into an easy-to-follow roadmap.
+
 Include these sections with detailed content:
 1. Executive Summary (1 page)
 2. Company Description
@@ -189,6 +191,8 @@ Business: {business_name}
 Industry: {industry}
 Brand Tone: {brand_tone}
 Primary Colors: {colors}
+
+Brand Inspiration: The Q-Empire brand is guided by Michelle, the Black Mermaid Queen of the Deep, her human son, and Q-Bot the automation agent. The aesthetic is magical, ocean-inspired, tech-forward, and welcoming to founders of color. Use this as inspiration for the client's brand guide.
 
 Include:
 1. Brand Story & Mission Statement

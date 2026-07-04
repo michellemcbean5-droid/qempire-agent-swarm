@@ -74,7 +74,7 @@ def run_task(task: dict) -> dict:
         "payload": task.get("payload", {}),
         "plan": [],
         "current_step": 0,
-        "event_stream": [f"[SYSTEM] Task received: {task['id']} ({task['type']})"],
+        "event_stream": [f"[MICHELLE] Task received: {task['id']} ({task['type']}) — let's build your empire! 🧜🏾‍♀️"],
         "final_result": None,
         "error_count": 0,
         "max_errors": MAX_RETRIES,

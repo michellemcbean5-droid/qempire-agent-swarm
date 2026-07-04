@@ -39,7 +39,7 @@
       "params_template": {
         "to": "{client_email}",
         "subject": "Your Funding Roadmap is Ready! 💰",
-        "body": "We've identified grants, loans, and investor opportunities for your business. Check your Client Portal for the full funding strategy with application deadlines."
+        "body": "Michelle and Q-Bot have identified grants, loans, and investor opportunities for your business. Check your Client Portal for the full funding strategy with application deadlines."
       },
       "description": "Notify client that funding strategy is ready"
     }

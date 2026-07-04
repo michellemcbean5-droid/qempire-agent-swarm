@@ -23,7 +23,7 @@
       "params_template": {
         "to": "{client_email}",
         "subject": "Your Brand Identity Kit is Ready! 🎨",
-        "body": "Your complete brand guide is ready — including color palette, typography, voice guidelines, and tagline options. View it in your Client Portal."
+        "body": "Michelle and Q-Bot have created your complete brand guide — including color palette, typography, voice guidelines, and tagline options. View it in your Client Portal."
       },
       "description": "Notify client that branding kit is complete"
     }
