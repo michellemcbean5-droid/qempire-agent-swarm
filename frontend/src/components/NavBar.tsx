@@ -5,9 +5,10 @@ import { useAccount } from "../lib/account";
 
 const LINKS = [
   { href: "/idea", label: "Idea Builder" },
+  { href: "/simulator", label: "Path to $1M" },
+  { href: "/formula", label: "Formula" },
   { href: "/connectors", label: "Connectors" },
   { href: "/#pricing", label: "Pricing" },
-  { href: "/command", label: "Live Demo" },
 ];
 
 export default function NavBar() {

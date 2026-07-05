@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import {
   Check, Crown, Zap, Waves, ArrowRight, Bot, Wrench, Sparkles, ShieldCheck,
+  TrendingUp, Lightbulb, Rocket,
 } from "lucide-react";
 import NavBar from "../components/NavBar";
 import PromptBar from "../components/PromptBar";
@@ -185,6 +186,66 @@ export default function Home() {
                 See self-serve pricing <ArrowRight size={15} />
               </button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- Two interactive tools ---------------- */}
+      <section className="px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs text-gold">
+              <Crown size={13} /> Two interactive tools · idea → profit
+            </div>
+            <h2 className="mt-4 font-display text-3xl font-bold sm:text-4xl">Play with your future, then build it.</h2>
+            <p className="mx-auto mt-3 max-w-xl text-mist">
+              Made for parents &amp; the self-employed: shape a real idea, then see your path to a
+              million — before Q-Bot builds it all on autopilot.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-2">
+            <button onClick={() => navigate("/idea")} className="group relative overflow-hidden rounded-3xl glass-strong p-7 text-left transition hover:glow-cyan">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-cyan/15 px-3 py-1 text-xs font-semibold text-cyan">
+                <Lightbulb size={14} /> Interactive · Idea → Pitch
+              </div>
+              <h3 className="font-display text-2xl font-bold">Business Idea Builder</h3>
+              <p className="mt-2 text-sm text-mist">
+                Answer a few friendly questions and Q-Bot shapes your skill + free time into a real
+                business with a pitch, a 90-day plan, and income projection.
+              </p>
+              <div className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-cyan">
+                Build my idea <ArrowRight size={15} className="transition group-hover:translate-x-1" />
+              </div>
+            </button>
+
+            <button onClick={() => navigate("/simulator")} className="group relative overflow-hidden rounded-3xl glass-strong p-7 text-left transition hover:glow-gold">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-gold/15 px-3 py-1 text-xs font-semibold text-gold">
+                <TrendingUp size={14} /> Interactive · Path to $1M
+              </div>
+              <h3 className="font-display text-2xl font-bold">Millionaire Simulator</h3>
+              <p className="mt-2 text-sm text-mist">
+                Drag the sliders to your real numbers and watch automations running 24/7 compound a
+                small start into a seven-figure business.
+              </p>
+              <div className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-gold">
+                See my path to a million <ArrowRight size={15} className="transition group-hover:translate-x-1" />
+              </div>
+            </button>
+          </div>
+
+          {/* millionaire formula band */}
+          <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-3xl bg-gradient-to-r from-purple/15 to-magenta/10 p-7 sm:flex-row">
+            <div className="flex items-center gap-4">
+              <Rocket className="text-gold" size={28} />
+              <div>
+                <h3 className="font-display text-xl font-bold">The Millionaire Formula</h3>
+                <p className="text-sm text-mist">7 guided steps, each running on autopilot 24/7 — from idea to $1M.</p>
+              </div>
+            </div>
+            <button onClick={() => navigate("/formula")} className="shrink-0 inline-flex items-center gap-1.5 rounded-full btn-gold px-5 py-2.5 text-sm font-bold">
+              Follow the formula <ArrowRight size={15} />
+            </button>
           </div>
         </div>
       </section>

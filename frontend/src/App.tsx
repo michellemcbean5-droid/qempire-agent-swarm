@@ -3,6 +3,8 @@ import { Toaster } from "sonner";
 import OceanBackground from "./components/OceanBackground";
 import Home from "./pages/Home";
 import IdeaBuilder from "./pages/IdeaBuilder";
+import Simulator from "./pages/Simulator";
+import Formula from "./pages/Formula";
 import Command from "./pages/Command";
 import Connectors from "./pages/Connectors";
 import Account from "./pages/Account";
@@ -18,6 +20,8 @@ function App() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/idea" component={IdeaBuilder} />
+        <Route path="/simulator" component={Simulator} />
+        <Route path="/formula" component={Formula} />
         <Route path="/command" component={Command} />
         <Route path="/connectors" component={Connectors} />
         <Route path="/account" component={Account} />
