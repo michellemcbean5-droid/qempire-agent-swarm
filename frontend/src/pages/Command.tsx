@@ -10,7 +10,7 @@ import { useAccount } from "../lib/account";
 import { startBuild, getBuild, API_BASE, type BuildState } from "../lib/api";
 
 type Tab = "computer" | "swarm" | "files";
-type Status = "connecting" | "running" | "completed" | "failed" | "offline" | "nocredits";
+type Status = "connecting" | "running" | "completed" | "failed" | "offline" | "nocredits" | "legal";
 
 const accentDot: Record<string, string> = {
   cyan: "bg-cyan", purple: "bg-purple", magenta: "bg-magenta", gold: "bg-gold", blue: "bg-[#5b9bff]",
@@ -53,6 +53,11 @@ export default function Command() {
     stopPolling();
     setBuild(null);
     setErrorMsg("");
+    // Paperwork first — must accept agreements / sign the NDA before any build.
+    if (!account.legalAcceptedAt) {
+      setStatus("legal");
+      return;
+    }
     // Credits are spent per run, based on the chosen Q-Bot version.
     if (!spend(version.cost)) {
       setStatus("nocredits");
@@ -87,7 +92,7 @@ export default function Command() {
       setStatus("offline");
       setErrorMsg(e instanceof Error ? e.message : "Could not reach the engine.");
     }
-  }, [task, spend, version.cost, version.id, account.apiKey]);
+  }, [task, spend, version.cost, version.id, account.apiKey, account.legalAcceptedAt]);
 
   useEffect(() => {
     void begin();
@@ -109,7 +114,8 @@ export default function Command() {
     status === "running" ? "Working…" :
     status === "completed" ? "Task complete" :
     status === "failed" ? "Needs attention" :
-    status === "nocredits" ? "Out of credits" : "Engine offline";
+    status === "nocredits" ? "Out of credits" :
+    status === "legal" ? "Paperwork needed" : "Engine offline";
 
   return (
     <div className="flex h-screen flex-col">
@@ -221,6 +227,21 @@ export default function Command() {
           </div>
 
           <div ref={logRef} className="min-h-0 flex-1 overflow-y-auto p-4">
+            {/* paperwork gate — sign before building */}
+            {status === "legal" && (
+              <div className="mx-auto mt-10 max-w-md rounded-2xl glass-strong p-6 text-center">
+                <span className="text-3xl">📝</span>
+                <h3 className="mt-2 font-display text-lg font-bold">Quick paperwork first</h3>
+                <p className="mt-2 text-sm text-mist">
+                  Before Q-Bot builds anything, review the agreements and sign the NDA. Takes a minute —
+                  it protects you and your business.
+                </p>
+                <button onClick={() => navigate("/legal")} className="mt-4 rounded-full btn-brand px-5 py-2 text-xs font-semibold text-white">
+                  Review &amp; sign →
+                </button>
+              </div>
+            )}
+
             {/* out of credits */}
             {status === "nocredits" && (
               <div className="mx-auto mt-10 max-w-md rounded-2xl glass-strong p-6 text-center">
@@ -254,7 +275,7 @@ export default function Command() {
               </div>
             )}
 
-            {tab === "computer" && status !== "offline" && status !== "nocredits" && (
+            {tab === "computer" && status !== "offline" && status !== "nocredits" && status !== "legal" && (
               <div className="font-mono text-[12.5px] leading-relaxed">
                 <div className="text-mist/60">q-empire@swarm ~ % run --task "{task.slice(0, 48)}{task.length > 48 ? "…" : ""}"</div>
                 {events.map((e, i) => (
@@ -269,7 +290,7 @@ export default function Command() {
               </div>
             )}
 
-            {tab === "swarm" && status !== "offline" && status !== "nocredits" && (
+            {tab === "swarm" && status !== "offline" && status !== "nocredits" && status !== "legal" && (
               <div className="space-y-4">
                 <p className="text-xs text-mist">The 50-agent workforce Q-Bot can dispatch across your build.</p>
                 {DIVISIONS.map((d) => (
@@ -288,7 +309,7 @@ export default function Command() {
               </div>
             )}
 
-            {tab === "files" && status !== "offline" && status !== "nocredits" && (
+            {tab === "files" && status !== "offline" && status !== "nocredits" && status !== "legal" && (
               <div>
                 {status !== "completed" && <div className="text-sm text-mist">Deliverables appear here once the build completes.</div>}
                 {status === "completed" && (

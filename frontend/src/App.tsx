@@ -1,6 +1,7 @@
 import { Switch, Route } from "wouter";
 import { Toaster } from "sonner";
 import OceanBackground from "./components/OceanBackground";
+import QBotAssistant from "./components/QBotAssistant";
 import Home from "./pages/Home";
 import IdeaBuilder from "./pages/IdeaBuilder";
 import Simulator from "./pages/Simulator";
@@ -8,6 +9,7 @@ import Formula from "./pages/Formula";
 import Command from "./pages/Command";
 import Connectors from "./pages/Connectors";
 import Account from "./pages/Account";
+import Legal from "./pages/Legal";
 import Checkout from "./pages/Checkout";
 import Onboard from "./pages/Onboard";
 import ClientPortal from "./pages/ClientPortal";
@@ -25,6 +27,7 @@ function App() {
         <Route path="/command" component={Command} />
         <Route path="/connectors" component={Connectors} />
         <Route path="/account" component={Account} />
+        <Route path="/legal" component={Legal} />
         <Route path="/checkout/:packageId" component={Checkout} />
         <Route path="/onboard" component={Onboard} />
         <Route path="/client-portal" component={ClientPortal} />
@@ -40,6 +43,7 @@ function App() {
           </div>
         </Route>
       </Switch>
+      <QBotAssistant />
     </div>
   );
 }

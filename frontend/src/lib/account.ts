@@ -16,6 +16,9 @@ export interface Account {
   credits: number;              // current balance
   creditsDate: string;          // YYYY-MM-DD of last refill
   monthlyCredits: number;       // granted by plan
+  legalAcceptedAt: string;      // ISO date agreements were accepted ("" if not)
+  ndaName: string;              // signature typed on the NDA
+  assistant: { name: string; tone: string; focus: string } | null; // programmable Q-Bot
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -29,6 +32,9 @@ const DEFAULT: Account = {
   credits: DAILY_FREE_CREDITS,
   creditsDate: today(),
   monthlyCredits: 0,
+  legalAcceptedAt: "",
+  ndaName: "",
+  assistant: null,
 };
 
 function read(): Account {

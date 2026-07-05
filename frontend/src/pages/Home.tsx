@@ -390,6 +390,12 @@ export default function Home() {
       <footer className="border-t hairline py-10 text-center text-xs text-mist">
         <img src="/brand/qai-logo.webp" alt="Q-AI" className="mx-auto mb-3 h-20 w-20 rounded-2xl" loading="lazy" />
         <div>Q-Empire Automation Division · Intelligent Automation. Limitless Possibilities.</div>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-mist/70">
+          <a href="/legal" className="hover:text-ink">NDA &amp; Agreements</a>
+          <a href="/legal" className="hover:text-ink">Terms</a>
+          <a href="/legal" className="hover:text-ink">Privacy</a>
+          <a href="/legal" className="hover:text-ink">Earnings Disclaimer</a>
+        </div>
       </footer>
     </div>
   );
