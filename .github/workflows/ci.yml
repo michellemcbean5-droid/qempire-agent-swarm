@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nodejs npm git curl jq
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run Python linter (flake8)
+        run: |
+          flake8 core/ bridge/ tools/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 core/ bridge/ tools/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Run Python formatter check (black)
+        run: |
+          black --check core/ bridge/ tools/ tests/ || true
+
+      - name: Run Python type check (mypy)
+        run: |
+          mypy core/ bridge/ tools/ --ignore-missing-imports || true
+
+      - name: Run Python tests (pytest)
+        run: |
+          pytest tests/ -v --tb=short
+
+  node-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ["20", "22"]
+
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Run TypeScript compiler check
+        run: npx tsc --noEmit
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run frontend linter (ESLint)
+        run: |
+          npx eslint src/ --ext .ts,.tsx || true
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [python-tests, node-tests]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: docker build -t qempire-agent-swarm:latest .
+
+      - name: Test Docker Compose
+        run: docker compose config
