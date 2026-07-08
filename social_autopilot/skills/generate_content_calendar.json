@@ -1,0 +1,35 @@
+{
+  "skill_name": "generate_content_calendar",
+  "description": "Generate a multi-platform social media content calendar for a campaign",
+  "trigger_task_type": "SOCIAL_CONTENT_CALENDAR",
+  "steps": [
+    {
+      "step": 1,
+      "action": "generate_content",
+      "params_template": {
+        "campaign": "{campaign}",
+        "topics": "{topics}",
+        "platforms": "{platforms}",
+        "brand_voice": "{brand_voice}"
+      },
+      "description": "Generate on-brand captions and hashtags for each topic and platform"
+    },
+    {
+      "step": 2,
+      "action": "schedule_posts",
+      "params_template": {
+        "start_date": "{start_date}",
+        "cadence": "{cadence}"
+      },
+      "description": "Spread posts across each platform's preferred posting slots"
+    },
+    {
+      "step": 3,
+      "action": "save_calendar",
+      "params_template": {
+        "campaign": "{campaign}"
+      },
+      "description": "Persist the content calendar to output/social for review"
+    }
+  ]
+}

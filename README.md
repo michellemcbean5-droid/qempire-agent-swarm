@@ -63,8 +63,25 @@ qempire-agent-swarm/
 ├── memory/         # bridge.json + context files
 ├── templates/      # Website, document, and automation templates
 ├── frontend/       # React client app (checkout, onboard, portal)
+├── social_autopilot/ # Social media autopilot (generate, schedule, publish)
 └── tests/          # Unit tests
 ```
+
+## Social Autopilot
+
+The [`social_autopilot/`](social_autopilot/README.md) module is a standalone
+engine that generates on-brand social content, schedules it across each
+platform's best posting slots, and publishes it on autopilot (Twitter/X,
+Instagram, LinkedIn, Facebook, TikTok).
+
+```bash
+# End-to-end demo — no API keys required (dry-run publishing)
+python -m social_autopilot.cli demo
+```
+
+It uses the Claude API when `ANTHROPIC_API_KEY` is set and falls back to a
+template engine otherwise, so it is fully runnable offline. See
+[`social_autopilot/README.md`](social_autopilot/README.md) for details.
 
 ## Packages Supported
 

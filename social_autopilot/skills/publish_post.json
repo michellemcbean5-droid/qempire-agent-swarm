@@ -1,0 +1,34 @@
+{
+  "skill_name": "publish_post",
+  "description": "Publish scheduled social media posts across connected platforms",
+  "trigger_task_type": "SOCIAL_PUBLISH",
+  "steps": [
+    {
+      "step": 1,
+      "action": "collect_due_posts",
+      "params_template": {
+        "calendar": "{calendar}",
+        "now": "{now}"
+      },
+      "description": "Find scheduled posts whose publish time has arrived"
+    },
+    {
+      "step": 2,
+      "action": "publish_posts",
+      "params_template": {
+        "dry_run": "{dry_run}"
+      },
+      "description": "Route each due post to the correct platform publisher"
+    },
+    {
+      "step": 3,
+      "action": "send_email",
+      "params_template": {
+        "to": "{client_email}",
+        "subject": "Your posts are live! 📣",
+        "body": "Michelle and Q-Bot just published your scheduled social content. Check your Client Portal for engagement stats."
+      },
+      "description": "Notify the client that their posts went live"
+    }
+  ]
+}
