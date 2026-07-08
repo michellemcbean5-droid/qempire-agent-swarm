@@ -1,0 +1,60 @@
+fastlane_version "2.220"
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    increment_build_number(xcodeproj: "ios/QEmpire.xcodeproj")
+    build_app(
+      workspace: "ios/QEmpire.xcworkspace",
+      scheme: "QEmpire",
+      export_method: "app-store"
+    )
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Build and upload to App Store"
+  lane :release do
+    increment_build_number(xcodeproj: "ios/QEmpire.xcodeproj")
+    build_app(
+      workspace: "ios/QEmpire.xcworkspace",
+      scheme: "QEmpire",
+      export_method: "app-store"
+    )
+    upload_to_app_store(
+      force: true,
+      skip_metadata: false,
+      skip_screenshots: false,
+      submit_for_review: true
+    )
+  end
+end
+
+platform :android do
+  desc "Build and upload to Google Play Internal"
+  lane :beta do
+    gradle(
+      task: "bundleRelease",
+      project_dir: "android/"
+    )
+    upload_to_play_store(
+      track: "internal",
+      release_status: "draft"
+    )
+  end
+
+  desc "Build and upload to Google Play Production"
+  lane :release do
+    gradle(
+      task: "bundleRelease",
+      project_dir: "android/"
+    )
+    upload_to_play_store(
+      track: "production",
+      release_status: "completed"
+    )
+  end
+end

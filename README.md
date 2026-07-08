@@ -17,9 +17,16 @@ An autonomous AI agent system that builds entire businesses on autopilot. Client
 - FastAPI (webhook endpoint)
 - Google Sheets (CRM/database)
 - GitHub Pages (website hosting)
+- React Native + Expo (mobile app)
+- HuggingFace Inference API (free AI)
+- RevenueCat (in-app purchases)
+- AdMob (ad monetization)
+- PostHog (analytics)
+- Zustand (mobile state management)
 
 ## Quick Start
 
+### Backend
 ```bash
 # 1. Clone the repo
 git clone https://github.com/YOUR_USERNAME/qempire-agent-swarm.git
@@ -38,12 +45,32 @@ curl -X POST http://localhost:8080/task \
   -d '{"type": "BUILD_WEBSITE", "payload": {"business_name": "TestCorp", "industry": "Technology"}}'
 ```
 
+### Mobile App
+```bash
+# 1. Navigate to mobile directory
+cd mobile
+
+# 2. Copy environment variables
+cp .env.example .env
+# Edit .env with your API keys (HuggingFace, PostHog, etc.)
+
+# 3. Install dependencies
+npm install
+
+# 4. Start Expo development server
+npx expo start
+
+# Press 'i' for iOS simulator, 'a' for Android emulator
+# Or scan QR code with Expo Go app on your phone
+```
+
 ## Installation
 
 ### Prerequisites
 - Python 3.11+
 - Node.js 20+
 - Docker & Docker Compose (recommended)
+- Expo CLI (for mobile): `npm install -g expo-cli`
 
 ### Python Backend
 ```bash
@@ -53,10 +80,17 @@ pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
-### Frontend
+### Frontend (Web)
 ```bash
 cd frontend
 npm install
+```
+
+### Mobile App
+```bash
+cd mobile
+npm install
+# iOS only: cd ios && pod install
 ```
 
 ## Running Locally
@@ -84,7 +118,13 @@ cd frontend
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:5173` and the API at `http://localhost:8080`.
+**Terminal 4** — Mobile app (optional):
+```bash
+cd mobile
+npx expo start
+```
+
+The frontend will be available at `http://localhost:5173`, the API at `http://localhost:8080`, and the mobile app via Expo.
 
 ## Testing
 
@@ -105,6 +145,23 @@ npm run build
 npx tsc --noEmit
 ```
 
+### Mobile App Tests
+```bash
+cd mobile
+npm run test:ci      # Run all tests with coverage
+npm run typecheck    # TypeScript type checking
+npm run lint         # ESLint
+```
+
+### Mobile Build
+```bash
+cd mobile
+eas build --profile preview --platform android    # Preview APK
+eas build --profile preview --platform ios       # Simulator build
+eas build --profile production --platform android # Production AAB
+eas build --profile production --platform ios     # Production IPA
+```
+
 ## Linting / Formatting
 
 ### Python
@@ -119,6 +176,12 @@ isort core/ bridge/ tools/ tests/
 ```bash
 cd frontend
 npx eslint src/ --ext .ts,.tsx
+```
+
+### Mobile
+```bash
+cd mobile
+npm run lint
 ```
 
 ## Deployment
@@ -152,16 +215,31 @@ Client Pays → Onboarding Wizard → Google Sheets → bridge.json → Agent Sw
 
 ```
 qempire-agent-swarm/
-├── core/           # Agent loop (Planner, Executor, Verifier)
-├── tools/          # Browser, Shell, File System, Content Gen, etc.
-├── skills/         # JSON skill definitions for each task type
-├── bridge/         # Task queue monitor and webhook receiver
-├── memory/         # bridge.json + context files
-├── templates/      # Website, document, and automation templates
-├── frontend/       # React client app (checkout, onboard, portal)
-├── tests/          # Unit tests (pytest)
-├── docs/           # Architecture, deployment, getting-started guides
-├── .github/workflows/  # CI/CD (Python + Node.js + Docker)
+├── core/                  # Agent loop (Planner, Executor, Verifier)
+├── tools/                 # Browser, Shell, File System, Content Gen, etc.
+├── skills/                # JSON skill definitions for each task type
+├── bridge/                # Task queue monitor and webhook receiver
+├── memory/                # bridge.json + context files
+├── templates/             # Website, document, and automation templates
+├── frontend/              # React web client (checkout, onboard, portal)
+├── mobile/                # React Native Expo app (iOS + Android)
+│   ├── src/
+│   │   ├── screens/       # 10 full-featured screens
+│   │   ├── components/    # Reusable UI (GradientButton, Skeleton, etc.)
+│   │   ├── stores/        # Zustand state management
+│   │   ├── services/      # AI, monetization, analytics APIs
+│   │   ├── navigation/    # React Navigation config
+│   │   ├── types/         # TypeScript definitions
+│   │   ├── constants/     # App constants (colors, tiers, packages)
+│   │   └── tests/         # Jest test suites
+│   ├── App.tsx            # Root component
+│   ├── app.json           # Expo configuration
+│   ├── eas.json           # EAS build profiles
+│   ├── package.json       # Dependencies
+│   └── fastlane/          # Fastlane deployment config
+├── tests/                 # Unit tests (pytest)
+├── docs/                  # Architecture, deployment, getting-started guides
+├── .github/workflows/     # CI/CD (Python + Node.js + Docker + Mobile)
 ├── docker-compose.yml
 ├── Dockerfile
 └── requirements.txt
@@ -183,6 +261,13 @@ qempire-agent-swarm/
 - `docs/DEPLOYMENT.md` — Production deployment guide
 - `docs/COPILOT_PROMPTS.md` — Prompts for GitHub Copilot code generation
 - `docs/SELF_SERVICE_APP.md` — Frontend and self-service flow design
+- `docs/competitor-analysis.md` — Competitive landscape analysis
+- `docs/user-simulation.md` — UX persona testing and optimization
+- `docs/store-deployment.md` — App Store and Google Play submission guide
+- `docs/api-reference.md` — Mobile app API documentation
+- `docs/monetization.md` — Subscription tiers, pricing, and promo codes
+- `docs/architecture.md` — Mobile app architecture overview
+- `docs/getting-started.md` — Mobile app developer onboarding
 - `AGENTS.md` — Developer/contributor conventions and architecture cheat sheet
 
 ## Contributing
@@ -197,9 +282,14 @@ qempire-agent-swarm/
 ## CI/CD
 
 GitHub Actions runs on every push to `master`:
-- Python tests (3.11, 3.12) + linting (`flake8`, `black`, `mypy`)
-- Node.js build (20, 22) + TypeScript compilation
-- Docker image build + Docker Compose validation
+- **Python tests** (3.11, 3.12) + linting (`flake8`, `black`, `mypy`)
+- **Frontend build** (Node.js 20, 22) + TypeScript compilation
+- **Mobile tests** (Node.js 20) + TypeScript + linting
+- **Docker image build** + Docker Compose validation
+- **Mobile preview builds** (Android + iOS) via EAS
+
+On release tags (`v*`):
+- **Mobile production builds** (Android AAB + iOS IPA) via EAS
 
 ## License
 
