@@ -23,6 +23,8 @@ Task Type: {task_type}
 Task Payload:
 {payload}
 
+Active Agent: {agent_name} (Specialty: {agent_specialty}, Personality: {agent_personality})
+
 Available Tools:
 - browser_navigate(url): Visit a webpage and extract content
 - browser_search(query): Search the web for information
@@ -34,6 +36,9 @@ Available Tools:
 - generate_document(doc_type, data): Generate a PDF/PPTX document
 - deploy_to_github(repo_name, folder): Push code to GitHub Pages
 - send_email(to, subject, body): Send an email notification
+- track_crm_entry(name, email, stage, company, deal_value, notes): Add/update CRM lead or client
+- create_invoice(client_name, client_email, line_items, business_name, due_days): Generate invoice
+- generate_social_post(business_name, topic, platform, tone, include_hashtags): Create social media post
 
 Create a JSON plan. Each step must have:
 - "step": sequential number starting from 1
@@ -55,6 +60,9 @@ def _load_skill_plan(task_type: str, payload: dict) -> list[dict] | None:
         "SETUP_AUTOMATIONS": "setup_automations.json",
         "RESEARCH_FUNDING": "research_funding.json",
         "GENERATE_BRANDING": "generate_branding.json",
+        "SETUP_CRM": "setup_crm.json",
+        "CREATE_INVOICE": "create_invoice.json",
+        "POST_SOCIAL_MEDIA": "post_social_media.json",
     }
 
     skill_file = skill_map.get(task_type)
@@ -95,11 +103,14 @@ def _load_skill_plan(task_type: str, payload: dict) -> list[dict] | None:
     return steps
 
 
-def _generate_plan_with_llm(task_type: str, payload: dict) -> list[dict]:
+def _generate_plan_with_llm(task_type: str, payload: dict, agent_name: str = "Q-Bot", agent_specialty: str = "general", agent_personality: str = "professional") -> list[dict]:
     """Generate a plan dynamically using the LLM."""
     prompt = PLANNER_PROMPT.format(
         task_type=task_type,
-        payload=json.dumps(payload, indent=2)
+        payload=json.dumps(payload, indent=2),
+        agent_name=agent_name,
+        agent_specialty=agent_specialty,
+        agent_personality=agent_personality,
     )
 
     if USE_LANGCHAIN:
@@ -141,13 +152,20 @@ def planner_node(state: AgentState) -> AgentState:
     """Generate an execution plan for the task."""
     task_type = state["task_type"]
     payload = state["payload"]
+    active_agent = state.get("active_agent") or {}
 
     # Try skill-based plan first (faster, no API call)
     plan = _load_skill_plan(task_type, payload)
 
     if plan is None:
-        # Fall back to LLM-generated plan
-        plan = _generate_plan_with_llm(task_type, payload)
+        # Fall back to LLM-generated plan with agent personality context
+        plan = _generate_plan_with_llm(
+            task_type,
+            payload,
+            agent_name=active_agent.get("name", "Q-Bot"),
+            agent_specialty=active_agent.get("specialty", "general"),
+            agent_personality=active_agent.get("personality", "professional"),
+        )
 
     state["plan"] = plan
     state["current_step"] = 0

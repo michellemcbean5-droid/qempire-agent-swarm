@@ -6,6 +6,7 @@ Uses LangGraph for state machine orchestration with 3 agent nodes.
 """
 from langgraph.graph import StateGraph, END
 from core.state import AgentState
+from core.qbot import qbot_node
 from core.planner import planner_node
 from core.executor import executor_node
 from core.verifier import verifier_node
@@ -31,13 +32,15 @@ def build_agent_graph():
     """Build and compile the LangGraph agent swarm."""
     graph = StateGraph(AgentState)
 
-    # Add the 3 agent nodes
+    # Add all agent nodes — Q-Bot is the entry point
+    graph.add_node("qbot", qbot_node)
     graph.add_node("planner", planner_node)
     graph.add_node("executor", executor_node)
     graph.add_node("verifier", verifier_node)
 
-    # Define the flow
-    graph.set_entry_point("planner")
+    # Define the flow: Q-Bot → Planner → Executor → Verifier → loop/end
+    graph.set_entry_point("qbot")
+    graph.add_edge("qbot", "planner")
     graph.add_edge("planner", "executor")
     graph.add_edge("executor", "verifier")
 
@@ -78,6 +81,9 @@ def run_task(task: dict) -> dict:
         "final_result": None,
         "error_count": 0,
         "max_errors": MAX_RETRIES,
+        "agent_profiles": [],
+        "active_agent": None,
+        "qbot_context": {},
     }
 
     # Run the graph

@@ -16,6 +16,9 @@ import ProjectDetailScreen from '../screens/ProjectDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import SupportScreen from '../screens/SupportScreen';
 import ReferralsScreen from '../screens/ReferralsScreen';
+import QBotScreen from '../screens/QBotScreen';
+import AgentManagementScreen from '../screens/AgentManagementScreen';
+import AgentDetailScreen from '../screens/AgentDetailScreen';
 
 export type RootStackParamList = {
   Main: undefined;
@@ -25,13 +28,17 @@ export type RootStackParamList = {
   Settings: undefined;
   Support: undefined;
   Referrals: undefined;
+  QBot: undefined;
+  AgentManagement: undefined;
+  AgentDetail: { agentId: string };
 };
 
 export type MainTabParamList = {
   Home: undefined;
   Dashboard: undefined;
   Projects: undefined;
-  AI: undefined;
+  QBot: undefined;
+  Agents: undefined;
   Profile: undefined;
 };
 
@@ -74,8 +81,13 @@ function MainTabs() {
         options={{ tabBarIcon: ({ focused }) => <TabIcon icon="🚀" focused={focused} /> }}
       />
       <Tab.Screen
-        name="AI"
-        component={AIScreen}
+        name="QBot"
+        component={QBotScreen}
+        options={{ tabBarIcon: ({ focused }) => <TabIcon icon="👑" focused={focused} />, tabBarLabel: 'Q-Bot' }}
+      />
+      <Tab.Screen
+        name="Agents"
+        component={AgentManagementScreen}
         options={{ tabBarIcon: ({ focused }) => <TabIcon icon="🤖" focused={focused} /> }}
       />
       <Tab.Screen
@@ -105,6 +117,9 @@ export default function RootNavigator() {
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen name="Support" component={SupportScreen} />
           <Stack.Screen name="Referrals" component={ReferralsScreen} />
+          <Stack.Screen name="QBot" component={QBotScreen} />
+          <Stack.Screen name="AgentManagement" component={AgentManagementScreen} />
+          <Stack.Screen name="AgentDetail" component={AgentDetailScreen} />
         </>
       ) : (
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />

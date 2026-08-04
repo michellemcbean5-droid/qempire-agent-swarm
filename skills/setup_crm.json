@@ -1,0 +1,46 @@
+{
+  "name": "Setup CRM",
+  "description": "Set up a basic CRM by logging the client as the first entry and sending a welcome email",
+  "steps": [
+    {
+      "step": 1,
+      "action": "track_crm_entry",
+      "description": "Log the client as the first CRM entry",
+      "params_template": {
+        "name": "{client_name}",
+        "email": "{client_email}",
+        "stage": "client",
+        "company": "{business_name}",
+        "deal_value": 0,
+        "notes": "Onboarded via Q-Empire. Business idea: {business_idea}"
+      }
+    },
+    {
+      "step": 2,
+      "action": "generate_content",
+      "description": "Generate a CRM welcome sequence outline",
+      "params_template": {
+        "prompt": "Create a 5-email welcome sequence for a new client named {client_name} who just launched {business_name}. Include subject lines and body copy for each email."
+      }
+    },
+    {
+      "step": 3,
+      "action": "file_write",
+      "description": "Save the CRM welcome sequence to disk",
+      "params_template": {
+        "path": "/home/ubuntu/output/documents/{client_name}_crm_welcome_sequence.md",
+        "content": "{result}"
+      }
+    },
+    {
+      "step": 4,
+      "action": "send_email",
+      "description": "Send CRM setup confirmation email to client",
+      "params_template": {
+        "to": "{client_email}",
+        "subject": "Your Q-Empire CRM is Ready 🚀",
+        "body": "Hi {client_name},\n\nYour CRM has been set up by Q-Bot! We've logged your business profile for {business_name} and created a welcome email sequence to help you convert your first clients.\n\nYour empire is growing!\n\n— Michelle & Q-Bot 🧜🏾‍♀️"
+      }
+    }
+  ]
+}

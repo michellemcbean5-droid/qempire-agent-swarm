@@ -23,3 +23,7 @@ class AgentState(TypedDict):
     final_result: dict | None
     error_count: int
     max_errors: int
+    # Q-Bot / agent customization fields
+    agent_profiles: list[Any]        # list of AgentProfile dicts
+    active_agent: Any                # AgentProfile dict for the agent handling this task
+    qbot_context: dict               # extra Q-Bot metadata (routing rationale, etc.)
