@@ -1,0 +1,32 @@
+{
+  "skill_name": "build_pitch_deck",
+  "description": "Generate a 12-slide investor pitch deck",
+  "trigger_task_type": "BUILD_PITCH_DECK",
+  "steps": [
+    {
+      "step": 1,
+      "action": "generate_document",
+      "params_template": {
+        "doc_type": "pitch_deck",
+        "data": {
+          "business_name": "{business_name}",
+          "industry": "{industry}",
+          "elevator_pitch": "{elevator_pitch}",
+          "target_audience": "{target_audience}",
+          "funding_amount": "{funding_amount}"
+        }
+      },
+      "description": "Generate 12-slide investor pitch deck"
+    },
+    {
+      "step": 2,
+      "action": "send_email",
+      "params_template": {
+        "to": "{client_email}",
+        "subject": "Your Investor Pitch Deck is Ready! 📊",
+        "body": "Michelle and Q-Bot have created your professional 12-slide pitch deck. Log into your Client Portal to download it and share it with investors."
+      },
+      "description": "Notify client that pitch deck is ready"
+    }
+  ]
+}
