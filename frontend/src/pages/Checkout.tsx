@@ -1,18 +1,12 @@
 import { useRoute, useLocation } from "wouter";
 import { toast } from "sonner";
-
-const packageDetails: Record<string, { name: string; price: string; description: string }> = {
-  foundation: { name: "Foundation Launchpad", price: "$1,997", description: "Business plan, 3-page website, 3 automations, funding strategy" },
-  "empire-pro": { name: "Empire Builder Pro", price: "$4,997", description: "Full buildout with 5-7 page website, 10 automations, and aggressive funding" },
-  enterprise: { name: "Enterprise AI", price: "$15,000+", description: "Custom AI systems, multi-agent orchestration, and dedicated support" },
-  payg: { name: "Pay-As-You-Go", price: "$250+", description: "Individual modules — pick exactly what you need" },
-};
+import { PACKAGES, type PackageId } from "../lib/constants";
 
 export default function Checkout() {
   const [, params] = useRoute("/checkout/:packageId");
   const [, navigate] = useLocation();
-  const packageId = params?.packageId || "foundation";
-  const pkg = packageDetails[packageId] || packageDetails.foundation;
+  const packageId = (params?.packageId || "foundation") as PackageId;
+  const pkg = PACKAGES[packageId] || PACKAGES.foundation;
 
   const handlePayment = () => {
     toast.success("Redirecting to secure checkout...");
@@ -32,11 +26,17 @@ export default function Checkout() {
           <p className="text-white/60 text-sm">Michelle & Q-Bot are ready to build your empire</p>
         </div>
 
-        <div className="bg-[#0A0A1A] border border-[#BF00FF]/30 rounded-xl p-6 mb-6">
+        <div className="bg-[#0A0A1A] border border-[#BF00FF]/30 rounded-xl p-6 mb-4">
           <h2 className="font-bold text-lg text-[#00FFFF]">{pkg.name}</h2>
-          <p className="text-white/60 text-sm mt-1">{pkg.description}</p>
+          <ul className="mt-2 space-y-1">
+            {pkg.features.map((f, i) => (
+              <li key={i} className="text-sm text-white/60 flex items-center gap-2">
+                <span className="text-[#00C853]">✓</span>{f}
+              </li>
+            ))}
+          </ul>
           <div className="text-3xl font-black mt-4">{pkg.price}</div>
-          <div className="text-sm text-white/40">one-time payment</div>
+          <div className="text-sm text-white/40">{pkg.billing}</div>
         </div>
 
         <button onClick={handlePayment} className="w-full bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-black font-bold py-4 rounded-lg text-lg mb-4">

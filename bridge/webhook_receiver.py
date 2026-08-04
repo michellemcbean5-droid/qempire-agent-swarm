@@ -104,6 +104,31 @@ async def list_tasks():
     }
 
 
+@app.get("/status")
+async def get_status_by_email(email: str):
+    """
+    Get all tasks for a given client email — used by the Client Portal dashboard.
+    Returns progress for blueprint, website, automations, and funding tasks.
+    """
+    bridge = load_bridge()
+    client_tasks = []
+
+    for queue_name in ["pending", "needs_clarification", "completed"]:
+        for task in bridge[queue_name]:
+            payload = task.get("payload", {})
+            if payload.get("email") == email or payload.get("client_email") == email:
+                client_tasks.append({
+                    "task_id": task.get("id"),
+                    "type": task.get("type"),
+                    "status": task.get("status", queue_name),
+                    "result": task.get("result"),
+                    "error": task.get("error"),
+                    "created_at": task.get("created_at"),
+                })
+
+    return {"email": email, "tasks": client_tasks, "total": len(client_tasks)}
+
+
 @app.post("/onboard")
 async def receive_onboarding(request: Request):
     """
@@ -116,9 +141,9 @@ async def receive_onboarding(request: Request):
 
     # Map package to task types
     package_tasks = {
-        "foundation": ["BUILD_BLUEPRINT", "BUILD_WEBSITE", "SETUP_AUTOMATIONS", "RESEARCH_FUNDING"],
-        "empire-pro": ["BUILD_BLUEPRINT", "BUILD_WEBSITE", "SETUP_AUTOMATIONS", "RESEARCH_FUNDING", "GENERATE_BRANDING"],
-        "enterprise": ["BUILD_BLUEPRINT", "BUILD_WEBSITE", "SETUP_AUTOMATIONS"],
+        "foundation": ["BUILD_BLUEPRINT", "BUILD_PITCH_DECK", "BUILD_WEBSITE", "SETUP_AUTOMATIONS", "RESEARCH_FUNDING"],
+        "empire-pro": ["BUILD_BLUEPRINT", "BUILD_PITCH_DECK", "BUILD_WEBSITE", "SETUP_AUTOMATIONS", "RESEARCH_FUNDING", "GENERATE_BRANDING"],
+        "enterprise": ["BUILD_BLUEPRINT", "BUILD_PITCH_DECK", "BUILD_WEBSITE", "SETUP_AUTOMATIONS", "GENERATE_BRANDING"],
         "payg": data.get("selected_modules", []),
     }
 
