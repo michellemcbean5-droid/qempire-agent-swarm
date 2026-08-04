@@ -1,0 +1,39 @@
+{
+  "name": "Post Social Media",
+  "description": "Generate and queue social media posts for a business launch",
+  "steps": [
+    {
+      "step": 1,
+      "action": "generate_social_post",
+      "description": "Generate Instagram launch post",
+      "params_template": {
+        "business_name": "{business_name}",
+        "topic": "{business_idea}",
+        "platform": "instagram",
+        "tone": "excited",
+        "include_hashtags": true
+      }
+    },
+    {
+      "step": 2,
+      "action": "generate_social_post",
+      "description": "Generate LinkedIn announcement post",
+      "params_template": {
+        "business_name": "{business_name}",
+        "topic": "{business_idea}",
+        "platform": "linkedin",
+        "tone": "professional",
+        "include_hashtags": true
+      }
+    },
+    {
+      "step": 3,
+      "action": "file_write",
+      "description": "Save social media calendar to disk",
+      "params_template": {
+        "path": "/home/ubuntu/output/documents/{business_name}_social_calendar.md",
+        "content": "# Social Media Calendar for {business_name}\n\nPosts have been queued. Check /app/memory/social_queue.json for full queue."
+      }
+    }
+  ]
+}

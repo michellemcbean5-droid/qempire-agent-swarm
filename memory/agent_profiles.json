@@ -1,0 +1,142 @@
+[
+  {
+    "id": "qbot",
+    "name": "Q-Bot \u2014 Master Orchestrator",
+    "specialty": "general",
+    "personality": "professional",
+    "attitude": "motivating",
+    "schedule": {
+      "timezone": "America/New_York",
+      "work_days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "work_start": "00:00",
+      "work_end": "23:59",
+      "max_tasks_per_day": 999
+    },
+    "active": true,
+    "tasks_completed": 0,
+    "current_task_id": null
+  },
+  {
+    "id": "marketing-agent",
+    "name": "Maya \u2014 Marketing",
+    "specialty": "marketing",
+    "personality": "creative",
+    "attitude": "motivating",
+    "schedule": {
+      "timezone": "America/New_York",
+      "work_days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "work_start": "09:00",
+      "work_end": "17:00",
+      "max_tasks_per_day": 20
+    },
+    "active": true,
+    "tasks_completed": 0,
+    "current_task_id": null
+  },
+  {
+    "id": "finance-agent",
+    "name": "Fiona \u2014 Finance",
+    "specialty": "finance",
+    "personality": "analytical",
+    "attitude": "strict",
+    "schedule": {
+      "timezone": "America/New_York",
+      "work_days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "work_start": "09:00",
+      "work_end": "17:00",
+      "max_tasks_per_day": 20
+    },
+    "active": true,
+    "tasks_completed": 0,
+    "current_task_id": null
+  },
+  {
+    "id": "tech-agent",
+    "name": "Theo \u2014 Tech",
+    "specialty": "tech",
+    "personality": "professional",
+    "attitude": "balanced",
+    "schedule": {
+      "timezone": "America/New_York",
+      "work_days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "work_start": "09:00",
+      "work_end": "17:00",
+      "max_tasks_per_day": 20
+    },
+    "active": true,
+    "tasks_completed": 0,
+    "current_task_id": null
+  },
+  {
+    "id": "legal-agent",
+    "name": "Lexi \u2014 Legal",
+    "specialty": "legal",
+    "personality": "professional",
+    "attitude": "strict",
+    "schedule": {
+      "timezone": "America/New_York",
+      "work_days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "work_start": "09:00",
+      "work_end": "17:00",
+      "max_tasks_per_day": 20
+    },
+    "active": true,
+    "tasks_completed": 0,
+    "current_task_id": null
+  },
+  {
+    "id": "sales-agent",
+    "name": "Sam \u2014 Sales",
+    "specialty": "sales",
+    "personality": "aggressive",
+    "attitude": "urgent",
+    "schedule": {
+      "timezone": "America/New_York",
+      "work_days": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "work_start": "09:00",
+      "work_end": "17:00",
+      "max_tasks_per_day": 20
+    },
+    "active": true,
+    "tasks_completed": 0,
+    "current_task_id": null
+  }
+]

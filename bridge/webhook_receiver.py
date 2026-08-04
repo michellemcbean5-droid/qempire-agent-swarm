@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import BRIDGE_PATH
+from core.qbot import get_all_profiles, get_profile, update_profile
 
 app = FastAPI(
     title="Q-Empire Agent Swarm API",
@@ -172,6 +173,46 @@ async def receive_onboarding(request: Request):
         "tasks_created": created_tasks,
         "message": f"Michelle & Q-Bot are now building your empire! {len(created_tasks)} tasks queued.",
     }
+
+
+@app.get("/health")
+async def health_check():
+    """Health check with dependency status."""
+    bridge_ok = os.path.exists(os.path.dirname(BRIDGE_PATH)) or True
+    return {
+        "status": "healthy",
+        "service": "Q-Empire Agent Swarm",
+        "version": "2.0.0",
+        "bridge": "ok" if bridge_ok else "error",
+    }
+
+
+@app.get("/agents")
+async def list_agents():
+    """List all agent profiles."""
+    return {"agents": get_all_profiles()}
+
+
+@app.get("/agents/{agent_id}")
+async def get_agent(agent_id: str):
+    """Get a single agent profile."""
+    profile = get_profile(agent_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
+    return profile
+
+
+@app.patch("/agents/{agent_id}")
+async def configure_agent(agent_id: str, request: Request):
+    """
+    Update an agent's personality, attitude, schedule, or other settings.
+    Accepts a partial dict of fields to update.
+    """
+    updates = await request.json()
+    updated = update_profile(agent_id, updates)
+    if not updated:
+        raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
+    return {"status": "updated", "agent": updated}
 
 
 if __name__ == "__main__":

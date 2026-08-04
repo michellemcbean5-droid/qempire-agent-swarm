@@ -44,6 +44,14 @@ TASK_TYPES = [
     "FULL_FOUNDATION",
     "FULL_EMPIRE_PRO",
     "FULL_ENTERPRISE",
+    # Phase 3 additions
+    "SETUP_CRM",
+    "CREATE_INVOICE",
+    "POST_SOCIAL_MEDIA",
+    "RESEARCH_COMPETITOR",
+    "SEND_DAILY_REPORT",
+    "GENERATE_CONTRACT",
+    "ANALYZE_SEO",
 ]
 
 # Package Definitions
