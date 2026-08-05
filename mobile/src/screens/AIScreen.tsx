@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { aiService } from '../services/aiService';
 import { useAppStore } from '../stores/appStore';
 import { useSubscriptionStore } from '../stores/subscriptionStore';
+import { useCreditStore } from '../stores/creditStore';
 import { AIInsight } from '../types';
 import { GradientButton } from '../components/GradientButton';
 
@@ -15,6 +16,7 @@ export default function AIScreen() {
   const addInsight = useAppStore((s) => s.addInsight);
   const canUseFeature = useSubscriptionStore((s) => s.canUseFeature);
   const incrementAIRequest = useSubscriptionStore((s) => s.incrementAIRequest);
+  const { canAfford, deductCredits, getLowBalanceWarning, balance } = useCreditStore();
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -22,9 +24,15 @@ export default function AIScreen() {
       setResponse('⚠️ Daily AI request limit reached. Upgrade your plan for more.');
       return;
     }
+    if (!canAfford('generate_text')) {
+      setResponse('⚠️ Insufficient AI credits. Upgrade your plan or wait for your monthly reset.');
+      return;
+    }
     setLoading(true);
     incrementAIRequest();
+    const tx = deductCredits('generate_text');
     try {
+      void tx; // transaction recorded for audit trail
       const result = await aiService.generateText(prompt);
       setResponse(result);
       const insight: AIInsight = {
@@ -56,6 +64,10 @@ export default function AIScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>🤖 AI Assistant</Text>
         <Text style={styles.subtitle}>Powered by HuggingFace + Q-Bot intelligence</Text>
+        <Text style={styles.creditsLabel}>💳 {balance} credits remaining</Text>
+        {getLowBalanceWarning() && (
+          <Text style={styles.creditWarning}>{getLowBalanceWarning()}</Text>
+        )}
 
         <View style={styles.inputCard}>
           <TextInput
@@ -119,7 +131,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0A0A1A' },
   scroll: { padding: 20, paddingBottom: 40 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#FFFFFF' },
-  subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.5)', marginBottom: 20 },
+  subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.5)', marginBottom: 4 },
+  creditsLabel: { fontSize: 12, color: '#00FFFF', marginBottom: 4 },
+  creditWarning: { fontSize: 12, color: '#FFB300', marginBottom: 12, fontWeight: '600' },
   inputCard: {
     backgroundColor: '#1a1a2e',
     borderRadius: 16,
