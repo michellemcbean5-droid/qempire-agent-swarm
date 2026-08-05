@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCreditStore } from '../stores/creditStore';
 
 interface Message {
   id: string;
@@ -42,10 +43,27 @@ export default function QBotScreen() {
   ]);
 
   const webhookUrl = process.env.EXPO_PUBLIC_WEBHOOK_URL || 'http://localhost:8080';
+  const { canAfford, deductCredits, balance, getLowBalanceWarning } = useCreditStore();
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
     if (!text || loading) return;
+
+    // ── Credit gate ──────────────────────────────────────────────────────────
+    if (!canAfford('chat_message')) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `b_${Date.now()}`,
+          role: 'qbot',
+          content: '⚠️ You\'ve run out of AI credits for this month. Upgrade your plan to keep chatting! 💳',
+          timestamp: new Date(),
+        },
+      ]);
+      return;
+    }
+    deductCredits('chat_message');
+    // ────────────────────────────────────────────────────────────────────────
 
     const userMsg: Message = {
       id: `u_${Date.now()}`,
@@ -84,7 +102,7 @@ export default function QBotScreen() {
       setLoading(false);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [input, loading, webhookUrl]);
+  }, [input, loading, webhookUrl, canAfford, deductCredits]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -100,8 +118,16 @@ export default function QBotScreen() {
             <Text style={styles.headerTitle}>Q-Bot</Text>
             <Text style={styles.headerSub}>Master Orchestrator • 6 agents active</Text>
           </View>
-          <View style={styles.onlineDot} />
+          <View style={styles.headerRight}>
+            <Text style={styles.creditBadge}>💳 {balance}</Text>
+            <View style={styles.onlineDot} />
+          </View>
         </View>
+        {getLowBalanceWarning() && (
+          <View style={styles.warningBar}>
+            <Text style={styles.warningText}>{getLowBalanceWarning()}</Text>
+          </View>
+        )}
 
         {/* Messages */}
         <ScrollView
@@ -201,6 +227,16 @@ const styles = StyleSheet.create({
   headerInfo: { flex: 1 },
   headerTitle: { fontSize: 18, fontWeight: '700', color: '#FFFFFF' },
   headerSub: { fontSize: 12, color: '#00FFFF', marginTop: 2 },
+  headerRight: { alignItems: 'flex-end', gap: 4 },
+  creditBadge: { fontSize: 11, color: '#D4AF37', fontWeight: '600' },
+  warningBar: {
+    backgroundColor: 'rgba(255,179,0,0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,179,0,0.2)',
+  },
+  warningText: { fontSize: 12, color: '#FFB300', textAlign: 'center' },
   onlineDot: {
     width: 10,
     height: 10,

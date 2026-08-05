@@ -10,15 +10,16 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
-from core.config import BRIDGE_PATH
+from core.config import BRIDGE_PATH, ADMIN_API_KEY
 from core.qbot import get_all_profiles, get_profile, update_profile
+from core.feature_flags import get_all_flags, set_flag, set_flags, reset_flags, is_enabled
 
 app = FastAPI(
     title="Q-Empire Agent Swarm API",
     description="Webhook endpoint for the Q-Empire autonomous agent system — guided by Michelle & Q-Bot",
-    version="1.0.0",
+    version="2.0.0",
 )
 
 # Allow CORS for the React frontend
@@ -53,6 +54,11 @@ async def root():
 @app.post("/task")
 async def create_task(request: Request):
     """Receive a new task and add it to the pending queue."""
+    if not is_enabled("new_task_queue_enabled"):
+        raise HTTPException(status_code=503, detail="Task queue is currently disabled by admin.")
+    if not is_enabled("ai_generation_enabled"):
+        raise HTTPException(status_code=503, detail="AI generation is currently disabled by admin.")
+
     data = await request.json()
 
     task = {
@@ -136,6 +142,9 @@ async def receive_onboarding(request: Request):
     Receive onboarding data from the React wizard and create all required tasks.
     This is the main integration point with the frontend.
     """
+    if not is_enabled("onboarding_enabled"):
+        raise HTTPException(status_code=503, detail="Onboarding is currently disabled by admin.")
+
     data = await request.json()
     package_id = data.get("package_id", "foundation")
     client_email = data.get("email", "")
@@ -213,6 +222,100 @@ async def configure_agent(agent_id: str, request: Request):
     if not updated:
         raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
     return {"status": "updated", "agent": updated}
+
+
+# ─── Admin Helpers ────────────────────────────────────────────────────────────
+
+def _require_admin(x_admin_key: str | None) -> None:
+    """Raise 401 if admin API key is required but not provided/correct."""
+    if ADMIN_API_KEY and x_admin_key != ADMIN_API_KEY:
+        raise HTTPException(status_code=401, detail="Admin API key required.")
+
+
+# ─── Admin: Feature Flags ─────────────────────────────────────────────────────
+
+@app.get("/admin/flags")
+async def admin_get_flags(x_admin_key: str | None = Header(default=None)):
+    """[Admin] List all feature flags."""
+    _require_admin(x_admin_key)
+    return {"flags": get_all_flags()}
+
+
+@app.patch("/admin/flags")
+async def admin_set_flags(request: Request, x_admin_key: str | None = Header(default=None)):
+    """[Admin] Update one or more feature flags. Body: {"flag_name": true/false, ...}"""
+    _require_admin(x_admin_key)
+    updates = await request.json()
+    if not isinstance(updates, dict):
+        raise HTTPException(status_code=422, detail="Body must be a JSON object of {flag: bool}")
+    updated = set_flags({k: bool(v) for k, v in updates.items()})
+    return {"status": "updated", "flags": updated}
+
+
+@app.post("/admin/flags/reset")
+async def admin_reset_flags(x_admin_key: str | None = Header(default=None)):
+    """[Admin] Reset all feature flags to defaults."""
+    _require_admin(x_admin_key)
+    flags = reset_flags()
+    return {"status": "reset", "flags": flags}
+
+
+# ─── Admin: System Overview ───────────────────────────────────────────────────
+
+@app.get("/admin/overview")
+async def admin_overview(x_admin_key: str | None = Header(default=None)):
+    """[Admin] System overview: task counts, agent statuses, feature flags."""
+    _require_admin(x_admin_key)
+    bridge = load_bridge()
+    agents = get_all_profiles()
+    flags = get_all_flags()
+    return {
+        "task_counts": {
+            "pending": len(bridge.get("pending", [])),
+            "needs_clarification": len(bridge.get("needs_clarification", [])),
+            "completed": len(bridge.get("completed", [])),
+        },
+        "agents": [
+            {
+                "id": a["id"],
+                "name": a["name"],
+                "active": a["active"],
+                "tasks_completed": a["tasks_completed"],
+                "current_task_id": a.get("current_task_id"),
+            }
+            for a in agents
+        ],
+        "feature_flags": flags,
+    }
+
+
+# ─── Admin: Credits ────────────────────────────────────────────────────────────
+
+@app.post("/admin/credits/grant")
+async def admin_grant_credits(request: Request, x_admin_key: str | None = Header(default=None)):
+    """
+    [Admin] Grant credits to a user. Requires body: {"user_id": "...", "amount": 100, "reason": "..."}
+    NOTE: This is a backend record only. Mobile app syncs via its own credit store.
+    """
+    _require_admin(x_admin_key)
+    data = await request.json()
+    user_id = data.get("user_id", "")
+    amount = int(data.get("amount", 0))
+    reason = data.get("reason", "admin_grant")
+    if amount <= 0:
+        raise HTTPException(status_code=422, detail="Amount must be positive.")
+    # Log the grant to bridge as an audit entry
+    bridge = load_bridge()
+    bridge.setdefault("credit_grants", []).append({
+        "id": f"grant_{uuid.uuid4().hex[:8]}",
+        "user_id": user_id,
+        "amount": amount,
+        "reason": reason,
+        "granted_at": time.time(),
+    })
+    save_bridge(bridge)
+    print(f"[ADMIN] Granted {amount} credits to user {user_id} (reason: {reason})")
+    return {"status": "granted", "user_id": user_id, "amount": amount}
 
 
 if __name__ == "__main__":

@@ -49,7 +49,9 @@ class TestWebhookReceiver:
         assert response.status_code == 200
         assert response.json()["status"] == "online"
 
-    def test_create_task(self):
+    def test_create_task(self, tmp_path, monkeypatch):
+        import bridge.webhook_receiver as wr
+        monkeypatch.setattr(wr, "BRIDGE_PATH", str(tmp_path / "bridge.json"))
         client = TestClient(app)
         payload = {"type": "BUILD_WEBSITE", "payload": {"business_name": "Test"}}
         response = client.post("/task", json=payload)
@@ -64,7 +66,9 @@ class TestWebhookReceiver:
         assert "pending" in response.json()
         assert "completed" in response.json()
 
-    def test_onboard_endpoint(self):
+    def test_onboard_endpoint(self, tmp_path, monkeypatch):
+        import bridge.webhook_receiver as wr
+        monkeypatch.setattr(wr, "BRIDGE_PATH", str(tmp_path / "bridge.json"))
         client = TestClient(app)
         payload = {"package_id": "foundation", "email": "test@example.com", "business_name": "TestCo"}
         response = client.post("/onboard", json=payload)

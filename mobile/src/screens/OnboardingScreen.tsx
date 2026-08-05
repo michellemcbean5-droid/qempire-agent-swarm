@@ -39,12 +39,28 @@ export default function OnboardingScreen() {
 
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
+  const webhookUrl = process.env.EXPO_PUBLIC_WEBHOOK_URL || 'http://localhost:8080';
+
   const handleRegister = async () => {
     setLoading(true);
     try {
       await register(form.email, form.name, form.password);
+      // POST onboarding data to the agent swarm webhook
+      await fetch(`${webhookUrl}/onboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email,
+          name: form.name,
+          business_name: form.businessName,
+          industry: form.industry,
+          revenue_goal: form.revenueGoal,
+          timeline: form.timeline,
+          package_id: form.selectedPlan || 'foundation',
+        }),
+      });
     } catch (e) {
-      console.error(e);
+      console.error('Onboarding webhook error:', e);
     } finally {
       setLoading(false);
     }

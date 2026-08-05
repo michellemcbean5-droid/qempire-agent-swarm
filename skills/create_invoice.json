@@ -23,11 +23,11 @@
     {
       "step": 2,
       "action": "send_email",
-      "description": "Email the invoice to the client",
+      "description": "Email the invoice to the client — Michelle & Q-Bot 🧜🏾‍♀️",
       "params_template": {
         "to": "{client_email}",
         "subject": "Invoice from {business_name} — Payment Due in 30 Days",
-        "body": "Hi {client_name},\n\nPlease find your invoice attached. Payment is due within 30 days.\n\nThank you for choosing Q-Empire!\n\n— {business_name} via Q-Bot 🤖"
+        "body": "Hi {client_name},\n\nPlease find your invoice attached. Payment is due within 30 days.\n\nThank you for choosing Q-Empire! Michelle & Q-Bot are here to help you build your empire. 👑\n\n— {business_name} via Q-Bot 🤖"
       }
     }
   ]
