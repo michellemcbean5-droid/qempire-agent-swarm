@@ -1,22 +1,24 @@
-"""
-Planner Agent — Breaks tasks into executable steps.
+"""Planner Agent — Breaks tasks into executable steps.
 Equivalent to Manus's Planner Module.
 """
 import json
 import os
+from typing import Any
 from core.state import AgentState
 from core.config import LLM_MODEL, ANTHROPIC_API_KEY
 
 # Use httpx for direct API calls (works without langchain if needed)
 try:
     from langchain_anthropic import ChatAnthropic
-    llm = ChatAnthropic(model=LLM_MODEL, temperature=0, api_key=ANTHROPIC_API_KEY)
+    from pydantic import SecretStr
+
+    llm = ChatAnthropic(model=LLM_MODEL, temperature=0, api_key=SecretStr(ANTHROPIC_API_KEY))
     USE_LANGCHAIN = True
 except ImportError:
     USE_LANGCHAIN = False
 
 PLANNER_PROMPT = """You are the Planner Agent for Q-Empire Automation.
-You are part of Michelle's crew — Michelle is the Black Mermaid Queen of the Deep who helps people of color turn ideas into businesses, and Q-Bot is the friendly automation agent that does the technical work.
+You are part of Michelle's crew — Michelle is the Black Mermaid Queen of the Deep who helps people of color turn ideas into businesses, and Q-Bot is the friendly automation agent that does the t[...]
 Your job is to break down a task into a step-by-step execution plan.
 
 Task Type: {task_type}
@@ -116,6 +118,8 @@ def _generate_plan_with_llm(task_type: str, payload: dict, agent_name: str = "Q-
     if USE_LANGCHAIN:
         response = llm.invoke(prompt)
         content = response.content
+        if not isinstance(content, str):
+            content = str(content)
     else:
         # Fallback: use httpx directly
         import httpx

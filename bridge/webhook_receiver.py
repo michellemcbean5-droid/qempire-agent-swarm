@@ -10,10 +10,75 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import APIKeyHeader
 from core.config import BRIDGE_PATH
 from core.qbot import get_all_profiles, get_profile, update_profile
+from core.credit_wallet import (
+    get_wallet,
+    deduct_credits,
+    top_up_credits,
+    get_admin_summary,
+    set_daily_cap,
+)
+
+# ── Admin auth ────────────────────────────────────────────────────────────────
+ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "")
+_api_key_header = APIKeyHeader(name="X-Admin-Key", auto_error=False)
+
+
+def _require_admin(key: str = Depends(_api_key_header)) -> None:
+    """Dependency: raise 401 unless the correct admin key is provided."""
+    if not ADMIN_API_KEY:
+        # Admin key not configured — deny all admin access
+        raise HTTPException(status_code=503, detail="Admin access not configured. Set ADMIN_API_KEY.")
+    if key != ADMIN_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing admin key.")
+
+# ── Audit log ─────────────────────────────────────────────────────────────────
+AUDIT_LOG_PATH = os.getenv("AUDIT_LOG_PATH", "/app/memory/audit_log.json")
+
+# ── Feature flags ─────────────────────────────────────────────────────────────
+FLAGS_PATH = os.getenv("FLAGS_PATH", "/app/memory/feature_flags.json")
+
+DEFAULT_FLAGS = {
+    "agent_execution_enabled": True,
+    "new_task_submission_enabled": True,
+    "social_media_tool_enabled": True,
+    "email_tool_enabled": True,
+    "github_deploy_enabled": True,
+}
+
+
+def load_flags() -> dict:
+    if os.path.exists(FLAGS_PATH):
+        with open(FLAGS_PATH, "r") as f:
+            return json.load(f)
+    return DEFAULT_FLAGS.copy()
+
+
+def save_flags(flags: dict) -> None:
+    os.makedirs(os.path.dirname(FLAGS_PATH), exist_ok=True)
+    with open(FLAGS_PATH, "w") as f:
+        json.dump(flags, f, indent=2)
+
+
+def _write_audit(event_type: str, detail: dict) -> None:
+    os.makedirs(os.path.dirname(AUDIT_LOG_PATH), exist_ok=True)
+    entry = {"timestamp": time.time(), "date": time.strftime("%Y-%m-%d %H:%M:%S"), "event": event_type, **detail}
+    log = []
+    if os.path.exists(AUDIT_LOG_PATH):
+        try:
+            with open(AUDIT_LOG_PATH, "r") as f:
+                log = json.load(f)
+        except Exception:
+            log = []
+    log.append(entry)
+    # Keep last 1 000 entries
+    log = log[-1000:]
+    with open(AUDIT_LOG_PATH, "w") as f:
+        json.dump(log, f, indent=2)
 
 app = FastAPI(
     title="Q-Empire Agent Swarm API",
@@ -53,6 +118,10 @@ async def root():
 @app.post("/task")
 async def create_task(request: Request):
     """Receive a new task and add it to the pending queue."""
+    # Check kill switch
+    if not load_flags().get("new_task_submission_enabled", True):
+        raise HTTPException(status_code=503, detail="Task submission is temporarily disabled by admin.")
+
     data = await request.json()
 
     task = {
@@ -203,16 +272,124 @@ async def get_agent(agent_id: str):
 
 
 @app.patch("/agents/{agent_id}")
-async def configure_agent(agent_id: str, request: Request):
+async def configure_agent(agent_id: str, request: Request, _=Depends(_require_admin)):
     """
     Update an agent's personality, attitude, schedule, or other settings.
-    Accepts a partial dict of fields to update.
+    Requires X-Admin-Key header.
     """
     updates = await request.json()
     updated = update_profile(agent_id, updates)
     if not updated:
         raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
+    _write_audit("agent_updated", {"agent_id": agent_id, "updates": updates})
     return {"status": "updated", "agent": updated}
+
+
+# ── AI Credit endpoints ───────────────────────────────────────────────────────
+
+@app.get("/credits/{user_id}")
+async def get_credits(user_id: str, tier: str = "free"):
+    """Return the credit wallet for a user (read-only, no auth required)."""
+    wallet = get_wallet(user_id, tier)
+    return {"user_id": user_id, "balance": wallet["balance"], "spent_today": wallet["spent_today"], "tier": wallet["tier"]}
+
+
+@app.post("/credits/{user_id}/deduct")
+async def api_deduct_credits(user_id: str, request: Request):
+    """Deduct credits for an action. Body: {action, tier?, task_id?}"""
+    body = await request.json()
+    action = body.get("action", "default")
+    tier = body.get("tier", "free")
+    task_id = body.get("task_id")
+    try:
+        result = deduct_credits(user_id, action, tier, task_id)
+        _write_audit("credits_deducted", {"user_id": user_id, **result})
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=402, detail=str(exc))
+
+
+@app.post("/credits/{user_id}/topup")
+async def api_top_up_credits(user_id: str, request: Request, _=Depends(_require_admin)):
+    """Admin: add credits to a user wallet. Body: {amount, tier?, reason?}"""
+    body = await request.json()
+    amount = int(body.get("amount", 0))
+    if amount <= 0:
+        raise HTTPException(status_code=400, detail="amount must be > 0")
+    result = top_up_credits(user_id, amount, body.get("tier", "free"), body.get("reason", "admin_top_up"))
+    _write_audit("credits_topped_up", {"user_id": user_id, **result})
+    return result
+
+
+# ── Admin endpoints ────────────────────────────────────────────────────────────
+
+@app.get("/admin/credits/summary", dependencies=[Depends(_require_admin)])
+async def admin_credit_summary():
+    """Admin: full credit usage dashboard."""
+    return get_admin_summary()
+
+
+@app.post("/admin/credits/cap", dependencies=[Depends(_require_admin)])
+async def admin_set_cap(request: Request):
+    """Admin: update the global daily credit spend cap. Body: {daily_cap}"""
+    body = await request.json()
+    cap = int(body.get("daily_cap", 500))
+    result = set_daily_cap(cap)
+    _write_audit("daily_cap_updated", result)
+    return result
+
+
+@app.get("/admin/flags", dependencies=[Depends(_require_admin)])
+async def admin_get_flags():
+    """Admin: list all feature flags."""
+    return {"flags": load_flags()}
+
+
+@app.post("/admin/flags", dependencies=[Depends(_require_admin)])
+async def admin_set_flags(request: Request):
+    """Admin: update feature flags. Body: {flag_name: true/false, ...}"""
+    updates = await request.json()
+    flags = load_flags()
+    for key, val in updates.items():
+        if key in DEFAULT_FLAGS:
+            flags[key] = bool(val)
+    save_flags(flags)
+    _write_audit("flags_updated", {"updates": updates})
+    return {"flags": flags}
+
+
+@app.post("/admin/kill-switch", dependencies=[Depends(_require_admin)])
+async def admin_kill_switch(request: Request):
+    """Admin: emergency disable of agent execution and task submission."""
+    flags = load_flags()
+    flags["agent_execution_enabled"] = False
+    flags["new_task_submission_enabled"] = False
+    save_flags(flags)
+    _write_audit("kill_switch_activated", {"flags": flags})
+    return {"status": "killed", "message": "Agent execution and task submission disabled.", "flags": flags}
+
+
+@app.post("/admin/resume", dependencies=[Depends(_require_admin)])
+async def admin_resume():
+    """Admin: re-enable agent execution after a kill switch."""
+    flags = load_flags()
+    flags["agent_execution_enabled"] = True
+    flags["new_task_submission_enabled"] = True
+    save_flags(flags)
+    _write_audit("system_resumed", {"flags": flags})
+    return {"status": "resumed", "flags": flags}
+
+
+@app.get("/admin/audit-log", dependencies=[Depends(_require_admin)])
+async def admin_audit_log(limit: int = 100):
+    """Admin: view the last N audit log entries."""
+    if not os.path.exists(AUDIT_LOG_PATH):
+        return {"entries": [], "total": 0}
+    with open(AUDIT_LOG_PATH, "r") as f:
+        log = json.load(f)
+    entries = log[-limit:]
+    entries.reverse()  # Most recent first
+    return {"entries": entries, "total": len(log)}
 
 
 if __name__ == "__main__":

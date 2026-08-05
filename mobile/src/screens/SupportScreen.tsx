@@ -65,6 +65,17 @@ export default function SupportScreen() {
         <TouchableOpacity onPress={() => Linking.openURL('mailto:support@qempire.app')} style={styles.emailLink}>
           <Text style={styles.emailText}>📧 support@qempire.app</Text>
         </TouchableOpacity>
+
+        {/* Legal — required for Play Store / App Store submission */}
+        <Text style={styles.sectionTitle}>Legal</Text>
+        <View style={styles.legalRow}>
+          <TouchableOpacity onPress={() => Linking.openURL('https://qempire.app/privacy')} style={styles.legalLink}>
+            <Text style={styles.legalText}>🔒 Privacy Policy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => Linking.openURL('https://qempire.app/terms')} style={styles.legalLink}>
+            <Text style={styles.legalText}>📋 Terms of Service</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -95,4 +106,7 @@ const styles = StyleSheet.create({
   textArea: { minHeight: 100, textAlignVertical: 'top' },
   emailLink: { marginTop: 16, alignItems: 'center' },
   emailText: { color: '#4169E1', fontSize: 14 },
+  legalRow: { flexDirection: 'row', gap: 16, marginTop: 4, flexWrap: 'wrap' },
+  legalLink: { paddingVertical: 8 },
+  legalText: { color: 'rgba(255,255,255,0.5)', fontSize: 13 },
 });

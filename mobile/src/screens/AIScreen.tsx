@@ -1,20 +1,30 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { aiService } from '../services/aiService';
 import { useAppStore } from '../stores/appStore';
 import { useSubscriptionStore } from '../stores/subscriptionStore';
+import { useCreditStore } from '../stores/creditStore';
 import { AIInsight } from '../types';
 import { GradientButton } from '../components/GradientButton';
+import { CreditBadge, LowCreditModal } from '../components/CreditWidget';
+import { RootStackParamList } from '../navigation/RootNavigator';
 
 export default function AIScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [insights, setInsights] = useState<AIInsight[]>([]);
+  const [showLowCredit, setShowLowCredit] = useState(false);
   const addInsight = useAppStore((s) => s.addInsight);
   const canUseFeature = useSubscriptionStore((s) => s.canUseFeature);
   const incrementAIRequest = useSubscriptionStore((s) => s.incrementAIRequest);
+  const canAfford = useCreditStore((s) => s.canAfford);
+  const deduct = useCreditStore((s) => s.deduct);
+  const balance = useCreditStore((s) => s.balance);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -22,8 +32,13 @@ export default function AIScreen() {
       setResponse('⚠️ Daily AI request limit reached. Upgrade your plan for more.');
       return;
     }
+    if (!canAfford('ai_chat')) {
+      setShowLowCredit(true);
+      return;
+    }
     setLoading(true);
     incrementAIRequest();
+    deduct('ai_chat');
     try {
       const result = await aiService.generateText(prompt);
       setResponse(result);
@@ -37,6 +52,8 @@ export default function AIScreen() {
       };
       addInsight(insight);
       setInsights((prev) => [insight, ...prev]);
+      // Show low credit warning after deduction if near zero
+      if (balance - 5 <= 10) setShowLowCredit(true);
     } catch (e) {
       setResponse('Error generating response. Please try again.');
     } finally {
@@ -53,8 +70,16 @@ export default function AIScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <LowCreditModal
+        visible={showLowCredit}
+        onClose={() => setShowLowCredit(false)}
+        onUpgrade={() => { setShowLowCredit(false); navigation.navigate('Checkout', { packageId: 'empire-pro' }); }}
+      />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>🤖 AI Assistant</Text>
+        <View style={styles.header}>
+          <Text style={styles.title}>🤖 AI Assistant</Text>
+          <CreditBadge onUpgradePress={() => setShowLowCredit(true)} />
+        </View>
         <Text style={styles.subtitle}>Powered by HuggingFace + Q-Bot intelligence</Text>
 
         <View style={styles.inputCard}>
@@ -118,6 +143,7 @@ export default function AIScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0A0A1A' },
   scroll: { padding: 20, paddingBottom: 40 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#FFFFFF' },
   subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.5)', marginBottom: 20 },
   inputCard: {

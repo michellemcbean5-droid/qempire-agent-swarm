@@ -46,8 +46,7 @@ export default function CheckoutScreen() {
 
         <GradientButton title="Pay with PayPal" variant="gold" onPress={handlePurchase} size="lg" style={styles.payBtn} />
 
-        <Text style={styles.guarantee}>🔒 Secure payment via PayPal{'
-'}30-day money-back guarantee</Text>
+        <Text style={styles.guarantee}>{`🔒 Secure payment via PayPal\n30-day money-back guarantee`}</Text>
       </ScrollView>
     </SafeAreaView>
   );

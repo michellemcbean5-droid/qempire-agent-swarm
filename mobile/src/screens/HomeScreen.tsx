@@ -28,8 +28,8 @@ export default function HomeScreen() {
           <View style={styles.badge}>
             <Text style={styles.badgeText}>🧜🏾‍♀️ MICHELLE & Q-BOT</Text>
           </View>
-          <Text style={styles.title}>Build Your{'
-'}
+          <Text style={styles.title}>
+            Build Your{' '}
             <Text style={styles.gradientText}>Empire on Autopilot.</Text>
           </Text>
           <Text style={styles.subtitle}>
