@@ -1,17 +1,20 @@
 """Shell command execution tool (sandboxed inside Docker)."""
+import os
 import subprocess
 
 
 def shell_exec(command: str, timeout: int = 60) -> str:
     """Execute a shell command and return output. Only safe inside Docker."""
     try:
+        workspace = "/home/ubuntu/workspace"
+        cwd = workspace if os.path.isdir(workspace) else None
         result = subprocess.run(
             command,
             shell=True,
             capture_output=True,
             text=True,
             timeout=timeout,
-            cwd="/home/ubuntu/workspace",
+            cwd=cwd,
         )
         stdout = result.stdout.strip()
         stderr = result.stderr.strip()
