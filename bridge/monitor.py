@@ -2,10 +2,13 @@
 Bridge Monitor — Polls bridge.json for new tasks every 5 minutes.
 This is the main entry point that connects the React app to the agent swarm.
 """
+from __future__ import annotations
+
 import json
 import time
 import os
 import sys
+from typing import Any
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -14,17 +17,26 @@ from core.agent_loop import run_task
 from core.config import BRIDGE_PATH, POLL_INTERVAL
 
 
-def load_bridge() -> dict:
+def load_bridge() -> dict[str, list[dict[str, Any]]]:
     """Load the bridge file."""
     if not os.path.exists(BRIDGE_PATH):
-        default = {"pending": [], "needs_clarification": [], "completed": []}
+        default: dict[str, list[dict[str, Any]]] = {
+            "pending": [],
+            "needs_clarification": [],
+            "completed": [],
+        }
         save_bridge(default)
         return default
     with open(BRIDGE_PATH, "r") as f:
-        return json.load(f)
+        data = json.load(f)
+    return {
+        "pending": list(data.get("pending", [])),
+        "needs_clarification": list(data.get("needs_clarification", [])),
+        "completed": list(data.get("completed", [])),
+    }
 
 
-def save_bridge(data: dict) -> None:
+def save_bridge(data: dict[str, list[dict[str, Any]]]) -> None:
     """Save the bridge file atomically."""
     os.makedirs(os.path.dirname(BRIDGE_PATH), exist_ok=True)
     temp_path = BRIDGE_PATH + ".tmp"
@@ -41,15 +53,15 @@ def process_pending_tasks() -> None:
         return
 
     # Process the first pending task
-    task = bridge["pending"].pop(0)
-    task_id = task.get("id", "unknown")
-    task_type = task.get("type", "UNKNOWN")
+    task: dict[str, Any] = bridge["pending"].pop(0)
+    task_id = str(task.get("id", "unknown"))
+    task_type = str(task.get("type", "UNKNOWN"))
 
     print(f"[MONITOR] Processing task: {task_id} ({task_type})")
     print(f"[MONITOR] Payload: {json.dumps(task.get('payload', {}), indent=2)[:500]}")
 
     try:
-        result = run_task(task)
+        result: dict[str, Any] = run_task(task)
         task["status"] = "completed"
         task["result"] = result
         bridge["completed"].append(task)

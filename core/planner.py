@@ -4,15 +4,23 @@ Equivalent to Manus's Planner Module.
 """
 import json
 import os
-from core.state import AgentState
+from typing import Any, cast
+
+from core.state import AgentState, PlanStep
 from core.config import LLM_MODEL, ANTHROPIC_API_KEY
 
 # Use httpx for direct API calls (works without langchain if needed)
+llm: Any = None
+USE_LANGCHAIN = False
 try:
     from langchain_anthropic import ChatAnthropic
-    llm = ChatAnthropic(model=LLM_MODEL, temperature=0, api_key=ANTHROPIC_API_KEY)
-    USE_LANGCHAIN = True
-except ImportError:
+
+    if ANTHROPIC_API_KEY:
+        # langchain-anthropic stubs disagree with runtime aliases; ignore call-arg noise.
+        llm = ChatAnthropic(model=LLM_MODEL, temperature=0, api_key=ANTHROPIC_API_KEY)  # type: ignore[call-arg, arg-type]
+        USE_LANGCHAIN = True
+except Exception:
+    llm = None
     USE_LANGCHAIN = False
 
 PLANNER_PROMPT = """You are the Planner Agent for Q-Empire Automation.
@@ -69,8 +77,12 @@ def _load_skill_plan(task_type: str, payload: dict) -> list[dict] | None:
     if not skill_file:
         return None
 
-    skill_path = os.path.join("/app/skills", skill_file)
-    if not os.path.exists(skill_path):
+    candidates = [
+        os.path.join("/app/skills", skill_file),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "skills", skill_file),
+    ]
+    skill_path = next((path for path in candidates if os.path.exists(path)), None)
+    if not skill_path:
         return None
 
     with open(skill_path, "r") as f:
@@ -87,24 +99,49 @@ def _load_skill_plan(task_type: str, payload: dict) -> list[dict] | None:
             "result": None,
         }
         # Interpolate params
-        params = {}
-        for key, value in step_template.get("params_template", {}).items():
-            if isinstance(value, str):
+        params: dict[str, Any] = {}
+        for key, raw_value in step_template.get("params_template", {}).items():
+            if isinstance(raw_value, str):
+                value_str = raw_value
                 for pkey, pval in payload.items():
-                    value = value.replace(f"{{{pkey}}}", str(pval) if not isinstance(pval, (list, dict)) else json.dumps(pval))
-                params[key] = value
-            elif isinstance(value, dict):
-                params[key] = {k: str(v).format(**payload) if isinstance(v, str) else v for k, v in value.items()}
+                    value_str = value_str.replace(
+                        f"{{{pkey}}}",
+                        str(pval) if not isinstance(pval, (list, dict)) else json.dumps(pval),
+                    )
+                params[key] = value_str
+            elif isinstance(raw_value, dict):
+                params[key] = {
+                    k: str(v).format(**payload) if isinstance(v, str) else v
+                    for k, v in raw_value.items()
+                }
             else:
-                params[key] = value
+                params[key] = raw_value
         step["params"] = params
         steps.append(step)
 
     return steps
 
 
+def _fallback_plan(task_type: str, reason: str = "Fallback generation") -> list[dict]:
+    """Return a minimal static plan when LLM is unavailable."""
+    return [
+        {
+            "step": 1,
+            "action": "generate_content",
+            "params": {"prompt": f"Complete this task: {task_type}"},
+            "description": reason,
+            "status": "pending",
+            "result": None,
+        }
+    ]
+
+
 def _generate_plan_with_llm(task_type: str, payload: dict, agent_name: str = "Q-Bot", agent_specialty: str = "general", agent_personality: str = "professional") -> list[dict]:
     """Generate a plan dynamically using the LLM."""
+    # If no API key is configured, return a minimal fallback plan immediately
+    if not ANTHROPIC_API_KEY:
+        return _fallback_plan(task_type, "Fallback generation (no API key)")
+
     prompt = PLANNER_PROMPT.format(
         task_type=task_type,
         payload=json.dumps(payload, indent=2),
@@ -113,9 +150,11 @@ def _generate_plan_with_llm(task_type: str, payload: dict, agent_name: str = "Q-
         agent_personality=agent_personality,
     )
 
-    if USE_LANGCHAIN:
+    content: str
+    if USE_LANGCHAIN and llm is not None:
         response = llm.invoke(prompt)
-        content = response.content
+        raw = response.content
+        content = raw if isinstance(raw, str) else str(raw)
     else:
         # Fallback: use httpx directly
         import httpx
@@ -138,7 +177,7 @@ def _generate_plan_with_llm(task_type: str, payload: dict, agent_name: str = "Q-
                 json_str = json_str[4:].strip()
             plan = json.loads(json_str)
         else:
-            plan = [{"step": 1, "action": "generate_content", "params": {"prompt": f"Complete this task: {task_type}"}, "description": "Fallback generation", "status": "pending", "result": None}]
+            plan = _fallback_plan(task_type)
 
     # Ensure all steps have required fields
     for step in plan:
@@ -162,12 +201,12 @@ def planner_node(state: AgentState) -> AgentState:
         plan = _generate_plan_with_llm(
             task_type,
             payload,
-            agent_name=active_agent.get("name", "Q-Bot"),
-            agent_specialty=active_agent.get("specialty", "general"),
-            agent_personality=active_agent.get("personality", "professional"),
+            agent_name=active_agent.get("name", "Q-Bot") if isinstance(active_agent, dict) else "Q-Bot",
+            agent_specialty=active_agent.get("specialty", "general") if isinstance(active_agent, dict) else "general",
+            agent_personality=active_agent.get("personality", "professional") if isinstance(active_agent, dict) else "professional",
         )
 
-    state["plan"] = plan
+    state["plan"] = cast(list[PlanStep], plan)
     state["current_step"] = 0
     state["event_stream"].append(f"[PLANNER] Generated {len(plan)}-step plan for {task_type}")
 

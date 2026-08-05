@@ -74,14 +74,14 @@ Format with clear headings and paragraphs.
             pdf.add_page()
             pdf.set_auto_page_break(auto=True, margin=15)
             pdf.set_font("Helvetica", "B", 16)
-            pdf.cell(0, 10, f"Business Plan: {business_name}", ln=True)
+            pdf.cell(0, 10, f"Business Plan: {business_name}", new_x="LMARGIN", new_y="NEXT")
             pdf.set_font("Helvetica", "", 11)
             pdf.ln(5)
 
             for line in content.split("\n"):
                 if line.startswith("#"):
                     pdf.set_font("Helvetica", "B", 14)
-                    pdf.cell(0, 8, line.replace("#", "").strip(), ln=True)
+                    pdf.cell(0, 8, line.replace("#", "").strip(), new_x="LMARGIN", new_y="NEXT")
                     pdf.set_font("Helvetica", "", 11)
                 else:
                     pdf.multi_cell(0, 6, line)

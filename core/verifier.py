@@ -2,7 +2,9 @@
 Verifier Agent — Checks results and advances the plan.
 Equivalent to Manus's Verification Agent.
 """
-from core.state import AgentState
+from typing import Any
+
+from core.state import AgentState, PlanStep
 
 
 def verifier_node(state: AgentState) -> AgentState:
@@ -10,10 +12,10 @@ def verifier_node(state: AgentState) -> AgentState:
     if state["current_step"] >= len(state["plan"]):
         # All steps done
         state["final_result"] = _build_final_result(state)
-        state["event_stream"].append("[MICHELLE] All steps complete. Your empire is ready! 🧜🏾‍♀️")
+        state["event_stream"].append("[MICHELLE] All steps complete. Your empire is ready! 🧜‍♀️")
         return state
 
-    current_step = state["plan"][state["current_step"]]
+    current_step: PlanStep = state["plan"][state["current_step"]]
 
     if current_step["status"] == "completed":
         # Success — advance to next step
@@ -25,7 +27,7 @@ def verifier_node(state: AgentState) -> AgentState:
         # Check if that was the last step
         if state["current_step"] >= len(state["plan"]):
             state["final_result"] = _build_final_result(state)
-            state["event_stream"].append("[MICHELLE] All steps complete. Your empire is ready! 🧜🏾‍♀️")
+            state["event_stream"].append("[MICHELLE] All steps complete. Your empire is ready! 🧜‍♀️")
 
     elif current_step["status"] == "failed":
         if state["error_count"] >= state["max_errors"]:
@@ -50,7 +52,7 @@ def verifier_node(state: AgentState) -> AgentState:
     return state
 
 
-def _build_final_result(state: AgentState) -> dict:
+def _build_final_result(state: AgentState) -> dict[str, Any]:
     """Build the final result object from completed plan."""
     return {
         "status": "success",
@@ -62,9 +64,9 @@ def _build_final_result(state: AgentState) -> dict:
     }
 
 
-def _extract_deliverables(plan: list[dict]) -> dict:
+def _extract_deliverables(plan: list[PlanStep]) -> dict[str, dict[str, str]]:
     """Extract deliverable URLs and paths from completed steps."""
-    deliverables = {}
+    deliverables: dict[str, dict[str, str]] = {}
     for step in plan:
         if step.get("status") == "completed" and step.get("result"):
             result = str(step["result"])

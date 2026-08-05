@@ -80,21 +80,21 @@ def _generate_pdf(invoice: dict, path: str) -> None:
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Helvetica", "B", 20)
-    pdf.cell(0, 12, "INVOICE", ln=True, align="C")
+    pdf.cell(0, 12, "INVOICE", new_x="LMARGIN", new_y="NEXT", align="C")
 
     pdf.set_font("Helvetica", "", 11)
     pdf.ln(4)
-    pdf.cell(0, 8, f"Invoice #: {invoice['invoice_number']}", ln=True)
-    pdf.cell(0, 8, f"Issued: {invoice['issued_date']}  |  Due: {invoice['due_date']}", ln=True)
-    pdf.cell(0, 8, f"From: {invoice['from']}", ln=True)
-    pdf.cell(0, 8, f"To: {invoice['to']['name']} ({invoice['to']['email']})", ln=True)
+    pdf.cell(0, 8, f"Invoice #: {invoice['invoice_number']}", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 8, f"Issued: {invoice['issued_date']}  |  Due: {invoice['due_date']}", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 8, f"From: {invoice['from']}", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 8, f"To: {invoice['to']['name']} ({invoice['to']['email']})", new_x="LMARGIN", new_y="NEXT")
 
     pdf.ln(6)
     pdf.set_font("Helvetica", "B", 11)
     pdf.cell(100, 8, "Description", border=1)
     pdf.cell(25, 8, "Qty", border=1, align="C")
     pdf.cell(35, 8, "Unit Price", border=1, align="R")
-    pdf.cell(30, 8, "Total", border=1, align="R", ln=True)
+    pdf.cell(30, 8, "Total", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
 
     pdf.set_font("Helvetica", "", 10)
     for item in invoice["line_items"]:
@@ -103,11 +103,11 @@ def _generate_pdf(invoice: dict, path: str) -> None:
         pdf.cell(100, 8, item.get("description", ""), border=1)
         pdf.cell(25, 8, str(qty), border=1, align="C")
         pdf.cell(35, 8, f"${price:,.2f}", border=1, align="R")
-        pdf.cell(30, 8, f"${qty * price:,.2f}", border=1, align="R", ln=True)
+        pdf.cell(30, 8, f"${qty * price:,.2f}", border=1, align="R", new_x="LMARGIN", new_y="NEXT")
 
     pdf.ln(4)
     pdf.set_font("Helvetica", "B", 12)
     pdf.cell(160, 8, "TOTAL DUE:")
-    pdf.cell(30, 8, f"${invoice['total']:,.2f} {invoice['currency']}", align="R", ln=True)
+    pdf.cell(30, 8, f"${invoice['total']:,.2f} {invoice['currency']}", align="R", new_x="LMARGIN", new_y="NEXT")
 
     pdf.output(path)
