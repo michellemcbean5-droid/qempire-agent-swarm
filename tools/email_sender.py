@@ -3,6 +3,15 @@ import smtplib
 import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from tools._retry import with_retry
+
+
+@with_retry(max_attempts=3, base_delay=2.0, retryable_exceptions=(smtplib.SMTPException, OSError))
+def _smtp_send(msg: MIMEMultipart, gmail_address: str, gmail_password: str) -> None:
+    """Inner SMTP call — retried on transient failures."""
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(gmail_address, gmail_password)
+        server.send_message(msg)
 
 
 def send_email(to: str, subject: str, body: str) -> str:
@@ -46,9 +55,7 @@ def send_email(to: str, subject: str, body: str) -> str:
         msg.attach(MIMEText(body, "plain"))
         msg.attach(MIMEText(html_body, "html"))
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(gmail_address, gmail_password)
-            server.send_message(msg)
+        _smtp_send(msg, gmail_address, gmail_password)
 
         return f"Email sent to {to}: {subject}"
 

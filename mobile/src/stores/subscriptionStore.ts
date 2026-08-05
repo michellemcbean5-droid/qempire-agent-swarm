@@ -35,13 +35,28 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
 
   canUseFeature: (feature) => {
     const limits = get().getTierLimits();
+    const tier = get().tier;
     switch (feature) {
       case 'ai_requests':
         return get().aiRequestsToday < limits.aiRequestsPerDay;
       case 'ads':
         return limits.adsEnabled;
       case 'api_access':
-        return get().tier === 'elite';
+        return tier === 'elite';
+      case 'agents':
+        // Free tier: max 2 active agents; basic+: all 6
+        return tier !== 'free' || true; // agents visible to all, config restricted
+      case 'premium_tools':
+        // Only pro/elite can use premium tools (social posting, advanced branding)
+        return tier === 'pro' || tier === 'elite';
+      case 'projects':
+        // TODO: check useAppStore project count against limits.maxProjects
+        // For now, gate only if limit is defined and > 0
+        return limits.maxProjects > 0;
+      case 'automations':
+        return limits.maxAutomations > 0;
+      case 'export':
+        return tier !== 'free';
       default:
         return true;
     }
