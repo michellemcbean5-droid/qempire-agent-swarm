@@ -25,7 +25,8 @@ GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
 # Agent Configuration
 POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", "300"))
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))
-BRIDGE_PATH = os.getenv("BRIDGE_PATH", "/app/memory/bridge.json")
+_default_bridge_dir = "/app/memory" if os.access("/app", os.W_OK) else "/tmp/qempire/memory"
+BRIDGE_PATH = os.getenv("BRIDGE_PATH", os.path.join(_default_bridge_dir, "bridge.json"))
 
 # Output Directories
 OUTPUT_DIR = "/home/ubuntu/output"

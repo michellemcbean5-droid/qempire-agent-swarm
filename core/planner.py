@@ -10,9 +10,14 @@ from core.config import LLM_MODEL, ANTHROPIC_API_KEY
 # Use httpx for direct API calls (works without langchain if needed)
 try:
     from langchain_anthropic import ChatAnthropic
-    llm = ChatAnthropic(model=LLM_MODEL, temperature=0, api_key=ANTHROPIC_API_KEY)
-    USE_LANGCHAIN = True
-except ImportError:
+    if ANTHROPIC_API_KEY:
+        llm = ChatAnthropic(model=LLM_MODEL, temperature=0, api_key=ANTHROPIC_API_KEY)
+        USE_LANGCHAIN = True
+    else:
+        llm = None
+        USE_LANGCHAIN = False
+except (ImportError, Exception):
+    llm = None
     USE_LANGCHAIN = False
 
 PLANNER_PROMPT = """You are the Planner Agent for Q-Empire Automation.
@@ -105,6 +110,10 @@ def _load_skill_plan(task_type: str, payload: dict) -> list[dict] | None:
 
 def _generate_plan_with_llm(task_type: str, payload: dict, agent_name: str = "Q-Bot", agent_specialty: str = "general", agent_personality: str = "professional") -> list[dict]:
     """Generate a plan dynamically using the LLM."""
+    # If no API key is configured, return a minimal fallback plan immediately
+    if not ANTHROPIC_API_KEY:
+        return [{"step": 1, "action": "generate_content", "params": {"prompt": f"Complete this task: {task_type}"}, "description": "Fallback generation (no API key)", "status": "pending", "result": None}]
+
     prompt = PLANNER_PROMPT.format(
         task_type=task_type,
         payload=json.dumps(payload, indent=2),
