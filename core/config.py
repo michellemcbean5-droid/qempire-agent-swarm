@@ -4,6 +4,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Admin setup — protects the in-app "paste your keys" page (/admin).
+# Set on first run from the page itself; no manual env editing required.
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
+# Where the admin page reads/writes keys. Defaults to .env at the repo root.
+ENV_PATH = os.getenv("ENV_PATH", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
+
 # LLM Configuration
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 LLM_MODEL = "claude-sonnet-4-20250514"

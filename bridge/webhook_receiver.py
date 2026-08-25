@@ -339,6 +339,56 @@ async def billing_webhook(request: Request):
         raise HTTPException(status_code=400, detail=f"Webhook error: {exc}")
 
 
+# ---------------------------------------------------------------------------
+# Admin setup — paste platform keys in one screen (no .env editing needed)
+# ---------------------------------------------------------------------------
+
+@app.get("/admin/config")
+async def admin_config():
+    """Tells the frontend whether to show the 'claim password' or 'unlock' screen."""
+    from bridge import admin
+    return {"configured": admin.is_configured(), "keys": admin.ALLOWED_KEYS}
+
+
+@app.post("/admin/claim")
+async def admin_claim(request: Request):
+    """First run: set the admin password."""
+    from bridge import admin
+    data = await request.json()
+    try:
+        return admin.claim(data.get("token", ""))
+    except admin.AdminUnauthorized as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+    except admin.AdminDisabled as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.post("/admin/status")
+async def admin_status(request: Request):
+    """Return which keys are set (masked). Requires the admin password."""
+    from bridge import admin
+    data = await request.json()
+    try:
+        return admin.status(data.get("token", ""))
+    except admin.AdminDisabled as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    except admin.AdminUnauthorized as exc:
+        raise HTTPException(status_code=401, detail=str(exc))
+
+
+@app.post("/admin/keys")
+async def admin_save(request: Request):
+    """Save keys to .env and apply them. Requires the admin password."""
+    from bridge import admin
+    data = await request.json()
+    try:
+        return admin.save(data.get("token", ""), data.get("keys", {}))
+    except admin.AdminDisabled as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    except admin.AdminUnauthorized as exc:
+        raise HTTPException(status_code=401, detail=str(exc))
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("WEBHOOK_PORT", "8080"))

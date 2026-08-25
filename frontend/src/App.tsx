@@ -13,6 +13,7 @@ import Legal from "./pages/Legal";
 import Checkout from "./pages/Checkout";
 import Onboard from "./pages/Onboard";
 import ClientPortal from "./pages/ClientPortal";
+import AdminSetup from "./pages/AdminSetup";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Route path="/checkout/:packageId" component={Checkout} />
         <Route path="/onboard" component={Onboard} />
         <Route path="/client-portal" component={ClientPortal} />
+        <Route path="/admin" component={AdminSetup} />
         <Route>
           <div className="flex min-h-screen items-center justify-center px-4 text-center">
             <div>

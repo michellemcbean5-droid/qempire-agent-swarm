@@ -107,3 +107,45 @@ export async function getBillingStatus(email: string): Promise<Entitlement> {
   if (!res.ok) throw new Error(`Status failed (${res.status})`);
   return (await res.json()) as Entitlement;
 }
+
+// ---- Admin setup: paste platform keys in one screen ----
+
+export interface AdminConfig {
+  configured: boolean;
+  keys: string[];
+}
+
+export interface KeyStatus {
+  configured: boolean;
+  keys: Record<string, { set: boolean; preview: string }>;
+  saved?: number;
+}
+
+export async function getAdminConfig(): Promise<AdminConfig> {
+  const res = await fetch(`${API_BASE}/admin/config`);
+  if (!res.ok) throw new Error("Could not reach the server.");
+  return (await res.json()) as AdminConfig;
+}
+
+async function adminPost(path: string, body: unknown): Promise<KeyStatus> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    let detail = `Request failed (${res.status})`;
+    try {
+      detail = (await res.json()).detail || detail;
+    } catch {
+      /* ignore */
+    }
+    throw new Error(detail);
+  }
+  return (await res.json()) as KeyStatus;
+}
+
+export const claimAdmin = (token: string) => adminPost("/admin/claim", { token });
+export const getKeyStatus = (token: string) => adminPost("/admin/status", { token });
+export const saveKeys = (token: string, keys: Record<string, string>) =>
+  adminPost("/admin/keys", { token, keys });
